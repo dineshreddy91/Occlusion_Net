@@ -18,13 +18,23 @@ Install the nvidia-docker from https://github.com/NVIDIA/nvidia-docker
 Setting up the docker
 
 ```bash
-conda install pytorch-nightly cudatoolkit=9.0 -c pytorch
-nvidia-docker build -t maskrcnn-benchmark docker/ 
+nvidia-docker build -t occlusion_net .
 ```
 
+### Setting up data
+```
+git clone https://github.com/dineshreddy91/carfusion_to_coco
+cd carfusion_to_coco
+virtualenv carfusion2coco -p python3.6
+source carfusion2coco/bin/activate
+pip install cython numpy
+pip install -r requirements.txt
+sh carfusion_coco_setup.sh
+deactivate
+```
 ### Running with docker
 ```
-docker run -v $PWD:/code -v /media/Car:/media/Car --shm-size=32GB --runtime=nvidia -it maskrcnn-benchmark:latest
+docker run -v $PWD:/code -v /media/Car:/media/Car --shm-size=32GB --runtime=nvidia -it occlusion_net:latest
 ``` 
 
 
