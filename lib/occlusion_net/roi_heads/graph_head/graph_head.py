@@ -20,6 +20,7 @@ class ROIGraphHead(torch.nn.Module):
         self.feature_extractor = make_roi_graph_feature_extractor(cfg)
         self.feature_extractor_heatmap = make_roi_keypoint_feature_extractor(cfg, in_channels)
         self.post_processor = make_roi_graph_post_processor(cfg)
+        self.post_processor_heatmap = make_roi_keypoint_post_processor(cfg)
         self.loss_evaluator_heatmap = make_roi_keypoint_loss_evaluator(cfg)
         self.loss_evaluator = make_roi_graph_loss_evaluator(cfg)
 
@@ -49,28 +50,41 @@ class ROIGraphHead(torch.nn.Module):
         if x.shape[0] == 0:
               return torch.zeros((0,x.shape[2],3)),proposals,{}
 
+
         ## convert heatmap to graph features
         graph_features = heatmaps_to_graph(kp_logits)
         #x = self.feature_extractor(featu)
-        edge_logits,KGNN2D,rtb_KGNN3D = self.feature_extractor(graph_features)
+
+        for inc,proposals_per_image in enumerate(proposals):
+             proposals_per_image = proposals_per_image.convert("xyxy")
+             width = proposals_per_image.bbox[:, 2] - proposals_per_image.bbox[:, 0]
+             height = proposals_per_image.bbox[:, 3] - proposals_per_image.bbox[:, 1]
+             if inc == 0:
+                 ratio = width/height
+             else:
+                 ratio = torch.cat((ratio,width/height))
+
+        edge_logits,KGNN2D,KGNN3D = self.feature_extractor(graph_features,ratio)
         if not self.training:
-            result = self.post_processor(kp_logits, proposals)
+            result = self.post_processor(KGNN2D, edge_logits, proposals)
             return KGNN2D, result, {}
 
 
        
         ## process groundtruth proposals
-        keypoints_gt, valid_vis_all, valid_invis_all, ratio_all = self.loss_evaluator.process_keypoints(proposals)
+        keypoints_gt, valid_vis_all, valid_invis_all = self.loss_evaluator.process_keypoints(proposals)
         valid_all = valid_vis_all+valid_invis_all
+        valid_all[:,-1] = valid_all[:,-1]*0 # dont compute loss in kgnn3d for center point
+        valid_all[:,8] = valid_all[:,8]*0 # dont compute the loss for exhaust 
 
         ## loss computation
         loss_edges = self.loss_evaluator.loss_edges(valid_vis_all, edge_logits)
         loss_kgnn2d = self.loss_evaluator.loss_kgnn2d(keypoints_gt,valid_all, KGNN2D)
         #print(rtb_KGNN3D)
-        #loss_kgnn3d = self.loss_evaluator.loss_kgnn3d(rtb_KGNN3D, valid_all, keypoints_gt, ratio_all)
+        loss_kgnn3d = self.loss_evaluator.loss_kgnn3d(KGNN3D, valid_all, keypoints_gt)
         loss_kp = self.loss_evaluator_heatmap(proposals, kp_logits)
-        return KGNN2D, proposals, dict(loss_edges=loss_edges,loss_kp=loss_kp,loss_kgnn2d=loss_kgnn2d)
-        #return KGNN2D, proposals, dict(loss_edges=loss_edges,loss_kp=loss_kp,loss_kgnn2d=loss_kgnn2d,loss_kgnn3d=loss_kgnn3d)
+        #return KGNN2D, proposals, dict(loss_edges=loss_edges,loss_kp=loss_kp,loss_kgnn2d=loss_kgnn2d)
+        return KGNN2D, proposals, dict(loss_edges=loss_edges,loss_kp=loss_kp,loss_kgnn2d=loss_kgnn2d,loss_kgnn3d=loss_kgnn3d)
         #return KGNN2D, proposals, dict(loss_kgnn2d=loss_kgnn2d, loss_edges=loss_edges)
 
 

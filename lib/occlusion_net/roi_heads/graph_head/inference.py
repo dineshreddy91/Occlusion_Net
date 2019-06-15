@@ -7,20 +7,20 @@ class KeypointGraphPostProcessor(nn.Module):
         super(KeypointGraphPostProcessor, self).__init__()
         self.keypointer = keypointer
 
-    def forward(self, x, boxes):
-        mask_prob = x
+    def forward(self, x, edges, boxes):
+        graph_prob = x
 
         scores = None
         if self.keypointer:
-            mask_prob, scores = self.keypointer(x, boxes)
+            graph_prob, scores = self.keypointer(x, edges, boxes)
 
         assert len(boxes) == 1, "Only non-batched inference supported for now"
         boxes_per_image = [box.bbox.size(0) for box in boxes]
-        mask_prob = mask_prob.split(boxes_per_image, dim=0)
+        graph_prob = graph_prob.split(boxes_per_image, dim=0)
         scores = scores.split(boxes_per_image, dim=0)
 
         results = []
-        for prob, box, score in zip(mask_prob, boxes, scores):
+        for prob, box, score in zip(graph_prob, boxes, scores):
             bbox = BoxList(box.bbox, box.size, mode="xyxy")
             for field in box.fields():
                 bbox.add_field(field, box.get_field(field))
@@ -36,8 +36,17 @@ class KeypointGraphPostProcessor(nn.Module):
 import numpy as np
 import cv2
 
+def edges_to_vis(edges,n_kps):
+    array = np.zeros([edges.shape[0], n_kps])
+    array = torch.FloatTensor(array)
+    for a in range(n_kps):
+        value = torch.sum(edges[:,a*(n_kps-1):(a+1)*(n_kps-1)],dim=1)/2
+        value[value>0] = 1
+        array[:,a] = value
+    return(array)
 
-def heatmaps_to_keypoints(maps, rois):
+
+def graphs_to_keypoints(graphs, edges, rois):
     """Extract predicted keypoint locations from heatmaps. Output has shape
     (#rois, 4, #keypoints) with the 4 rows corresponding to (x, y, logit, prob)
     for each keypoint.
@@ -56,13 +65,16 @@ def heatmaps_to_keypoints(maps, rois):
     heights = np.maximum(heights, 1)
     widths_ceil = np.ceil(widths)
     heights_ceil = np.ceil(heights)
-
     # NCHW to NHWC for use with OpenCV
-    maps = np.transpose(maps, [0, 2, 3, 1])
     min_size = 0  # cfg.KRCNN.INFERENCE_MIN_SIZE
-    num_keypoints = maps.shape[3]
+
+    num_keypoints = graphs.shape[1]
     xy_preds = np.zeros((len(rois), 3, num_keypoints), dtype=np.float32)
     end_scores = np.zeros((len(rois), num_keypoints), dtype=np.float32)
+    
+    _,edge_value=edges.max(-1)
+    visibilty_pred = edges_to_vis(edge_value,num_keypoints)
+    end_scores = visibilty_pred.numpy()*100 # np.zeros((len(rois), num_keypoints), dtype=np.float32)
     for i in range(len(rois)):
         if min_size > 0:
             roi_map_width = int(np.maximum(widths_ceil[i], min_size))
@@ -72,24 +84,18 @@ def heatmaps_to_keypoints(maps, rois):
             roi_map_height = heights_ceil[i]
         width_correction = widths[i] / roi_map_width
         height_correction = heights[i] / roi_map_height
-        roi_map = cv2.resize(
-            maps[i], (roi_map_width, roi_map_height), interpolation=cv2.INTER_CUBIC
-        )
-        # Bring back to CHW
-        roi_map = np.transpose(roi_map, [2, 0, 1])
-        # roi_map_probs = scores_to_probs(roi_map.copy())
-        w = roi_map.shape[2]
-        pos = roi_map.reshape(num_keypoints, -1).argmax(axis=1)
-        x_int = pos % w
-        y_int = (pos - x_int) // w
-        # assert (roi_map_probs[k, y_int, x_int] ==
-        #         roi_map_probs[k, :, :].max())
+
+        x_int = np.transpose(graphs[i,:,0]) * roi_map_width/56
+        y_int = graphs[i,:,1] * roi_map_height/56 
+        
         x = (x_int + 0.5) * width_correction
         y = (y_int + 0.5) * height_correction
         xy_preds[i, 0, :] = x + offset_x[i]
         xy_preds[i, 1, :] = y + offset_y[i]
         xy_preds[i, 2, :] = 1
-        end_scores[i, :] = roi_map[np.arange(num_keypoints), y_int, x_int]
+        
+
+
 
     return np.transpose(xy_preds, [0, 2, 1]), end_scores
 
@@ -108,16 +114,16 @@ class Keypointer(object):
     def __init__(self, padding=0):
         self.padding = padding
 
-    def __call__(self, masks, boxes):
+    def __call__(self, graphs, edges, boxes):
         # TODO do this properly
         if isinstance(boxes, BoxList):
             boxes = [boxes]
         assert len(boxes) == 1
 
-        result, scores = heatmaps_to_keypoints(
-            masks.detach().cpu().numpy(), boxes[0].bbox.cpu().numpy()
+        result, scores = graphs_to_keypoints(
+            graphs.cpu().numpy(), edges.cpu(), boxes[0].bbox.cpu().numpy()
         )
-        return torch.from_numpy(result).to(masks.device), torch.as_tensor(scores, device=masks.device)
+        return torch.from_numpy(result).to(graphs.device), torch.as_tensor(scores, device=graphs.device)
 
 
 def make_roi_graph_post_processor(cfg):
