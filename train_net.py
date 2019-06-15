@@ -18,8 +18,8 @@ if USE_COMETML==True:
                    log_code=True, log_graph=True, auto_param_logging=True, auto_metric_logging=True,
                    parse_args=True, auto_output_logging=True, log_env_detail=True, log_env_gpu=True)
    else:
-       experiment = Experiment(api_key=os.environ["COMET_API_KEY"],
-                   project_name="ml-pipeline", workspace="anuraag")
+       experiment = Experiment(api_key="LiWwy9jFgECvuJrPYK3c9qEvC",
+                        project_name="combined-keypoints", workspace="anuraag")
 else:
    from maskrcnn_benchmark.engine.trainer import do_train
 
@@ -165,7 +165,7 @@ def main():
     parser = argparse.ArgumentParser(description="PyTorch Object Detection Training")
     parser.add_argument(
         "--config-file",
-        default="configs/occlusion-net.yaml",
+        default="occlusion-net.yaml",
         metavar="FILE",
         help="path to config file",
         type=str,
