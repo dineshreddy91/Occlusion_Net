@@ -1,4 +1,4 @@
-ARG CUDA="9.0"
+ARG CUDA="10.0"
 ARG CUDNN="7"
 
 FROM nvidia/cuda:${CUDA}-cudnn${CUDNN}-devel-ubuntu16.04
@@ -36,6 +36,7 @@ ARG CUDA
 RUN echo conda install pytorch==1.0 cudatoolkit=${CUDA} -c pytorch \
  && conda clean -ya
 
+RUN pip install https://download.pytorch.org/whl/cu100/torch-1.0.1.post2-cp36-cp36m-linux_x86_64.whl
 # Install TorchVision master
 RUN git clone --single-branch --branch v0.2.2_branch https://github.com/pytorch/vision.git \
  && cd vision \
@@ -59,4 +60,3 @@ RUN git clone https://github.com/facebookresearch/maskrcnn-benchmark.git \
  && python setup.py build develop 
 
 WORKDIR /code
-COPY . /code/
