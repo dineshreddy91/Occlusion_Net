@@ -7,7 +7,25 @@ Basic training script for PyTorch
 
 import os
 
-from maskrcnn_benchmark.engine.trainer import do_train
+USE_COMETML = True#(os.environ.get("USE_COMETML", "false") == "true")
+if USE_COMETML==True:
+   from comet_ml import Experiment, ExistingExperiment
+   import os
+   from lib.trainer_cometml import do_train
+   if 'COMET_EXP_KEY' in os.environ:
+       experiment = ExistingExperiment(api_key=os.environ['COMET_API_KEY'],
+                   previous_experiment=os.environ['COMET_EXP_KEY'],
+                   log_code=True, log_graph=True, auto_param_logging=True, auto_metric_logging=True,
+                   parse_args=True, auto_output_logging=True, log_env_detail=True, log_env_gpu=True)
+   else:
+       experiment = Experiment(api_key=os.environ["COMET_API_KEY"],
+                   project_name="ml-pipeline", workspace="anuraag")
+else:
+   from maskrcnn_benchmark.engine.trainer import do_train
+
+
+
+
 # Set up custom environment before nearly anything else is imported
 # NOTE: this should be the first import (no not reorder)
 from maskrcnn_benchmark.utils.env import setup_environment  # noqa F401 isort:skip
@@ -79,7 +97,25 @@ def train(cfg, local_rank, distributed):
     )
 
     checkpoint_period = cfg.SOLVER.CHECKPOINT_PERIOD
-    do_train(
+    if USE_COMETML ==True:
+      data_loader_val = make_data_loader(cfg, is_train=False, is_distributed=distributed)
+      data_loader_val = data_loader_val[0]
+      do_train(
+        model,
+        data_loader_train,
+        data_loader_val,
+        optimizer,
+        scheduler,
+        checkpointer,
+        device,
+        checkpoint_period,
+        arguments,
+        experiment,
+        output_dir,
+      )
+
+    else:
+      do_train(
         model,
         data_loader_train,
         optimizer,
@@ -129,13 +165,18 @@ def main():
     parser = argparse.ArgumentParser(description="PyTorch Object Detection Training")
     parser.add_argument(
         "--config-file",
-        default="occlusion-net.yaml",
+        default="configs/occlusion-net.yaml",
         metavar="FILE",
         help="path to config file",
         type=str,
     )
     parser.add_argument("--local_rank", type=int, default=0)
 
+    parser.add_argument(
+        "--cometml-tag",
+        dest="cometml_tag",
+        default="occlusion-net",
+    )
 
     parser.add_argument(
         "--skip-test",
@@ -150,6 +191,8 @@ def main():
         nargs=argparse.REMAINDER,
     )
     args = parser.parse_args()
+    if USE_COMETML == True:
+        experiment.add_tag(args.cometml_tag)
 
     num_gpus = int(os.environ["WORLD_SIZE"]) if "WORLD_SIZE" in os.environ else 1
     args.distributed = num_gpus > 1
@@ -169,7 +212,7 @@ def main():
     if output_dir:
         mkdir(output_dir)
 
-    logger = setup_logger("occlusion_net", output_dir, get_rank())
+    logger = setup_logger("maskrcnn_benchmark", output_dir, get_rank())
     logger.info("Using {} GPUs".format(num_gpus))
     logger.info(args)
 
