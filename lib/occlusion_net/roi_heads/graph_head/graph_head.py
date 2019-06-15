@@ -66,25 +66,37 @@ class ROIGraphHead(torch.nn.Module):
 
         edge_logits,KGNN2D,KGNN3D = self.feature_extractor(graph_features,ratio)
         if not self.training:
+            #print(graph_features[0])
+            #print(KGNN2D[0])
+            #print(edge_logits[0])
+            #asas
             result = self.post_processor(KGNN2D, edge_logits, proposals)
+            result = self.post_processor(KGNN3D, edge_logits, proposals)
+            result = self.post_processor(graph_features, edge_logits, proposals)
             return KGNN2D, result, {}
 
 
        
         ## process groundtruth proposals
         keypoints_gt, valid_vis_all, valid_invis_all = self.loss_evaluator.process_keypoints(proposals)
-        valid_all = valid_vis_all+valid_invis_all
-        valid_all[:,-1] = valid_all[:,-1]*0 # dont compute loss in kgnn3d for center point
-        valid_all[:,8] = valid_all[:,8]*0 # dont compute the loss for exhaust 
+        #print(valid_vis_all)
+        #print(valid_invis_all)
+        valid_all = valid_vis_all+valid_invis_all 
+        #print(valid_all)
 
         ## loss computation
-        loss_edges = self.loss_evaluator.loss_edges(valid_vis_all, edge_logits)
-        loss_kgnn2d = self.loss_evaluator.loss_kgnn2d(keypoints_gt,valid_all, KGNN2D)
-        #print(rtb_KGNN3D)
-        loss_kgnn3d = self.loss_evaluator.loss_kgnn3d(KGNN3D, valid_all, keypoints_gt)
         loss_kp = self.loss_evaluator_heatmap(proposals, kp_logits)
+        #print(valid_all)
+        loss_edges = self.loss_evaluator.loss_edges(valid_vis_all, edge_logits)
+        loss_trifocal = self.loss_evaluator.loss_kgnn2d(keypoints_gt,valid_all, KGNN2D)
+        #print(rtb_KGNN3D)
+        valid_all = (valid_vis_all+valid_invis_all)*0 +1 
+        valid_all[:,-1] = valid_all[:,-1]*0 # dont compute loss in kgnn3d for center point
+        valid_all[:,8] = valid_all[:,8]*0 # dont compute the loss for exhaust
+        loss_kgnn3d = self.loss_evaluator.loss_kgnn3d(KGNN2D, valid_all, KGNN3D)
+        #loss_kgnn3d = self.loss_evaluator.loss_kgnn3d(KGNN3D, valid_all, KGNN2D)
         #return KGNN2D, proposals, dict(loss_edges=loss_edges,loss_kp=loss_kp,loss_kgnn2d=loss_kgnn2d)
-        return KGNN2D, proposals, dict(loss_edges=loss_edges,loss_kp=loss_kp,loss_kgnn2d=loss_kgnn2d,loss_kgnn3d=loss_kgnn3d)
+        return KGNN2D, proposals, dict(loss_edges=loss_edges,loss_kp=loss_kp,loss_trifocal=loss_trifocal,loss_kgnn3d=loss_kgnn3d)
         #return KGNN2D, proposals, dict(loss_kgnn2d=loss_kgnn2d, loss_edges=loss_edges)
 
 

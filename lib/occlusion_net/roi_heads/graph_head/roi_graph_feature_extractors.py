@@ -195,7 +195,7 @@ class graphRCNNFeatureExtractor(nn.Module):
         shape = torch.cat([shape, b], 1)# considering the middle of the boundingbox
         projected_points = orthographic_proj_withz(shape, rt[:,0:7], ratio)
 
-        return logits,KGNN2D,shape
+        return logits,KGNN2D,projected_points
 
 
 def make_roi_graph_feature_extractor(cfg):

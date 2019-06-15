@@ -1,5 +1,5 @@
 from lib.config import cfg
-from demo.predictor import COCODemo
+from lib.predictor import COCODemo
 import cv2
 import argparse
 import distutils.util

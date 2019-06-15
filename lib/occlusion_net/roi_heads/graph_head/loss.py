@@ -13,7 +13,7 @@ from maskrcnn_benchmark.structures.boxlist_ops import cat_boxlist
 
 from maskrcnn_benchmark.structures.keypoint import keypoints_to_heat_map
 from sklearn.decomposition import PCA
-
+import sys
 
 
 def keypoints_scaled(keypoints, rois, heatmap_size , bb_pad):
@@ -45,8 +45,9 @@ def keypoints_scaled(keypoints, rois, heatmap_size , bb_pad):
     x[x_boundary_inds] = heatmap_size - 1
     y[y_boundary_inds] = heatmap_size - 1
     valid_loc = (x >= 0) & (y >= 0) & (x < heatmap_size) & (y < heatmap_size)
-    vis = keypoints[..., 2] == 1
-    invis = keypoints[..., 2] == 0
+    #print(keypoints)
+    vis = (keypoints[..., 2] > 1)
+    invis = keypoints[..., 2] == 1
     valid_vis = (valid_loc & vis).long()
     valid_invis = (valid_loc & invis).long()
     squashed = torch.cat([x.view(-1,x.shape[0],x.shape[1]),y.view(-1,y.shape[0],y.shape[1])])
@@ -209,8 +210,8 @@ class KeypointRCNNLossComputation(object):
         keypoints_gt = keypoints_gt.type(torch.FloatTensor)*valid_points.unsqueeze(2).type(torch.FloatTensor)
         keypoints_logits = keypoints_logits.type(torch.FloatTensor)*valid_points.unsqueeze(2).type(torch.FloatTensor)
         keypoints_gt = keypoints_gt.cuda()
-        keypoints_logits = keypoints_logits.cuda() 
-        loss_occ = nll_gaussian(keypoints_gt[:,:,0:2], keypoints_logits[:,:,0:2] , 10)
+        keypoints_logits = keypoints_logits.cuda()
+        loss_occ = nll_gaussian(keypoints_gt[:,:,0:2], keypoints_logits[:,:,0:2] , 3)
         return loss_occ
 
 
@@ -257,10 +258,11 @@ class KeypointRCNNLossComputation(object):
         projected_points = projected_points.type(torch.FloatTensor).cuda()
         keypoint_kgnn2d = keypoint_kgnn2d*valid.unsqueeze(2).type(torch.FloatTensor).cuda()
         projected_points = projected_points*valid.unsqueeze(2).type(torch.FloatTensor).cuda()
-        #print(projected_points)
-        loss_kgnn3d = nll_gaussian(keypoint_kgnn2d[:,:,0:2], projected_points[:,:,0:2] , 10)
+        #print(projected_points[0,:,0:2])
+        #print(keypoint_kgnn2d[0,:,0:2])
+        loss_kgnn3d = nll_gaussian(keypoint_kgnn2d[:,:,0:2], projected_points[:,:,0:2] , 100)
         if torch.isnan(loss_kgnn3d):
-              asasas
+              sys.exit("kgnn3d error exploded")
         #print(loss_kgnn3d)
         return loss_kgnn3d
 

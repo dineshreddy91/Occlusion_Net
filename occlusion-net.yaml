@@ -1,6 +1,7 @@
 MODEL:
   META_ARCHITECTURE: "GeneralizedRCNN"
   WEIGHT: "catalog://ImageNetPretrained/MSRA/R-50"
+  #WEIGHT: "./log/model_0005000.pth"
   BACKBONE:
     CONV_BODY: "R-50-FPN"
   RESNETS:
@@ -36,19 +37,19 @@ MODEL:
     FEATURE_EXTRACTOR: "graphRCNNFeatureExtractor"
     SHARE_BOX_FEATURE_EXTRACTOR: False
 DATASETS:
-  TRAIN: ("keypoints_carfusion_train_cocostyle", )
-  TEST: ("keypoints_carfusion_test_cocostyle",)
+  TRAIN: ("keypoints_carfusion_test_cocostyle", )
+  TEST: ("keypoints_carfusion_train_cocostyle",)
 INPUT:
   MIN_SIZE_TRAIN: (640, 672, 704, 736, 768, 800)
 DATALOADER:
   SIZE_DIVISIBILITY: 32
 SOLVER:
-  IMS_PER_BATCH: 3
-  BASE_LR: 0.0025
+  IMS_PER_BATCH: 1
+  BASE_LR: 0.00025
   WEIGHT_DECAY: 0.0001
   STEPS: (480000, 640000)
   MAX_ITER: 220000
   CHECKPOINT_PERIOD: 5000
 TEST:
-  IMS_PER_BATCH: 3
+  IMS_PER_BATCH: 1
 OUTPUT_DIR: "./log"
