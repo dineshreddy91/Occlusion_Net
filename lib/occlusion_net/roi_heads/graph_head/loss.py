@@ -15,73 +15,6 @@ from maskrcnn_benchmark.structures.keypoint import keypoints_to_heat_map
 from sklearn.decomposition import PCA
 
 
-def hamilton_product(qa, qb):
-    """Multiply qa by qb.
-    Args:
-        qa: B X N X 4 quaternions
-        qb: B X N X 4 quaternions
-    Returns:
-        q_mult: B X N X 4
-    """
-    qa_0 = qa[:, :, 0]
-    qa_1 = qa[:, :, 1]
-    qa_2 = qa[:, :, 2]
-    qa_3 = qa[:, :, 3]
-    
-    qb_0 = qb[:, :, 0]
-    qb_1 = qb[:, :, 1]
-    qb_2 = qb[:, :, 2]
-    qb_3 = qb[:, :, 3]
-    
-    # See https://en.wikipedia.org/wiki/Quaternion#Hamilton_product
-    q_mult_0 = qa_0*qb_0 - qa_1*qb_1 - qa_2*qb_2 - qa_3*qb_3
-    q_mult_1 = qa_0*qb_1 + qa_1*qb_0 + qa_2*qb_3 - qa_3*qb_2
-    q_mult_2 = qa_0*qb_2 - qa_1*qb_3 + qa_2*qb_0 + qa_3*qb_1
-    q_mult_3 = qa_0*qb_3 + qa_1*qb_2 - qa_2*qb_1 + qa_3*qb_0
-    
-    return torch.stack([q_mult_0, q_mult_1, q_mult_2, q_mult_3], dim=-1)
-
-def quat_rotate(X, q):
-    """Rotate points by quaternions.
-    Args:
-        X: B X N X 3 points
-        q: B X 4 quaternions
-    Returns:
-        X_rot: B X N X 3 (rotated points)
-    """
-    # repeat q along 2nd dim
-    ones_x = X[[0], :, :][:, :, [0]]*0 + 1
-    q = torch.unsqueeze(q, 1)*ones_x
-
-    q_conj = torch.cat([ q[:, :, [0]] , -1*q[:, :, 1:4] ], dim=-1)
-    X = torch.cat([ X[:, :, [0]]*0, X ], dim=-1)
-    
-    X_rot = hamilton_product(q, hamilton_product(X, q_conj))
-    return X_rot[:, :, 1:4]
-
-
-def orthographic_proj_withz(X, cam, ratio, offset_z=0.):
-    """
-    X: B x N x 3
-    cam: B x 7: [sc, tx, ty, quaternions]
-    Orth preserving the z.
-    """
-    quat = cam[:, -4:]
-    
-    X_rot = quat_rotate(X, quat)
-
-    scale = cam[:, 0].contiguous().view(-1, 1, 1)
-    trans = cam[:, 1:3].contiguous().view(cam.size(0), 1, -1)
-
-    proj = scale * X_rot
-
-    proj_xy = proj[:, :, :2] + trans
-    proj_z = proj[:, :, 2, None] + offset_z
-    
-    ratio = ratio.repeat(14,1).permute(1, 0).contiguous().view(-1,14,1)
-    proj_xy = proj_xy*torch.cat((ratio*0+1, ratio), 2)#.view(-1,12)
-    return torch.cat((proj_xy, proj_z), 2)
-
 
 def keypoints_scaled(keypoints, rois, heatmap_size , bb_pad):
     if rois.numel() == 0:
@@ -117,8 +50,7 @@ def keypoints_scaled(keypoints, rois, heatmap_size , bb_pad):
     valid_vis = (valid_loc & vis).long()
     valid_invis = (valid_loc & invis).long()
     squashed = torch.cat([x.view(-1,x.shape[0],x.shape[1]),y.view(-1,y.shape[0],y.shape[1])])
-    ratio = width/height
-    return squashed, valid_vis, valid_invis, ratio
+    return squashed, valid_vis, valid_invis
 
 def keypoints_to_squash(keypoints, proposals, discretization_size, bb_pad):
     proposals = proposals.convert("xyxy")
@@ -160,33 +92,6 @@ def _within_box(points, boxes):
     )
     return x_within & y_within
 
-def pca_computation(path): 
-        pca_3d = np.load(path)
-        first_half = pca_3d[:,0:8,:]
-        second_half = pca_3d[:,8:,:]
-        sample_rows = np.zeros((pca_3d.shape[0],1,pca_3d.shape[2]))
-        pca_3d = np.concatenate((first_half,sample_rows), axis=1)
-        pca_3d = np.concatenate((pca_3d,second_half), axis=1)
-        pca_3d = np.concatenate((pca_3d,sample_rows), axis=1)
-        Xtrain = np.zeros((pca_3d.shape[0],21))
-        for inc, pca_inc in enumerate(pca_3d):
-            imp_points = pca_inc[::2,3:6]
-        
-            imp_points = imp_points.flatten()
-            Xtrain[inc,:] = imp_points
-    
-        pca = PCA(n_components=5)
-        pca.fit(Xtrain)
-
-        U, S, VT = np.linalg.svd(Xtrain - Xtrain.mean(0))
-        X_train_pca = pca.transform(Xtrain)
-    
-        mean_shape=torch.FloatTensor(pca.mean_)
-        pca_component = torch.FloatTensor(pca.components_)
-        mean_shape, pca_component = mean_shape.cuda(), pca_component.cuda()
-        return mean_shape, pca_component
-
-
 class KeypointRCNNLossComputation(object):
     def __init__(self, proposal_matcher, fg_bg_sampler, discretization_size, cfg):
         """
@@ -198,7 +103,6 @@ class KeypointRCNNLossComputation(object):
         self.proposal_matcher = proposal_matcher
         self.fg_bg_sampler = fg_bg_sampler
         self.discretization_size = discretization_size
-        self.mean_shape, self.pca_component = pca_computation('data/pca_3d_cad.npy')
         self.bb_pad = cfg.MODEL.ROI_GRAPH_HEAD.BB_PAD
         off_diag = np.ones([cfg.MODEL.ROI_KEYPOINT_HEAD.NUM_CLASSES, cfg.MODEL.ROI_KEYPOINT_HEAD.NUM_CLASSES]) - np.eye(cfg.MODEL.ROI_KEYPOINT_HEAD.NUM_CLASSES)
         self.idx =  torch.LongTensor(np.where(off_diag)[1].reshape(cfg.MODEL.ROI_KEYPOINT_HEAD.NUM_CLASSES,cfg.MODEL.ROI_KEYPOINT_HEAD.NUM_CLASSES-1)).cuda()
@@ -284,27 +188,22 @@ class KeypointRCNNLossComputation(object):
 
     #def __call__(self, proposals, keypoint_logits):
     def process_keypoints(self, proposals):
-        loop = 0
-        for proposals_per_image in proposals:
+        for inc, proposals_per_image in enumerate(proposals):
             kp = proposals_per_image.get_field("keypoints")
             keypoint_squashed = kp.keypoints
-            keypoints_per_image, valid_vis, valid_invis,ratio = keypoints_to_squash(kp, proposals_per_image, self.discretization_size, self.bb_pad)
-            if keypoints_per_image.shape[0] == 0:
-                 continue
-            keypoints_per_image = keypoints_per_image.permute(1, 2, 0)
+            keypoints_per_image, valid_vis, valid_invis = keypoints_to_squash(kp, proposals_per_image, self.discretization_size, self.bb_pad)
+            if keypoints_per_image.shape[0] != 0:
+                keypoints_per_image = keypoints_per_image.permute(1, 2, 0)
 
-            if loop == 0:
+                if inc == 0:
                    keypoints_gt = keypoints_per_image
-                   valid_vis_all = valid_vis
-                   valid_invis_all = valid_invis
-                   ratio_all = ratio
-            else:
+                   vis_all = valid_vis
+                   invis_all = valid_invis
+                else:
                    keypoints_gt = torch.cat((keypoints_gt,keypoints_per_image))
-                   valid_vis_all = torch.cat((valid_vis_all,valid_vis))
-                   valid_invis_all = torch.cat((valid_invis_all,valid_invis))
-                   ratio_all = torch.cat((ratio_all,ratio))
-            loop = loop+1
-        return keypoints_gt,valid_vis_all,valid_invis_all, ratio_all
+                   vis_all = torch.cat((vis_all,valid_vis))
+                   invis_all = torch.cat((invis_all,valid_invis))
+        return keypoints_gt,vis_all,invis_all
 
     def loss_kgnn2d(self, keypoints_gt, valid_points, keypoints_logits):
         keypoints_gt = keypoints_gt.type(torch.FloatTensor)*valid_points.unsqueeze(2).type(torch.FloatTensor)
@@ -353,16 +252,9 @@ class KeypointRCNNLossComputation(object):
         return loss_edges
 
 
-    def loss_kgnn3d(self, rt, valid, keypoint_kgnn2d, ratio_all):
-        keypoint_kgnn2d = keypoint_kgnn2d.type(torch.FloatTensor).cuda() 
-        shape_basis = rt[:,7:]
-        #print(rt)
-        shape = rt[:,7:]@(self.pca_component) + self.mean_shape
-        shape = shape.view(-1,7,3)
-        shape = torch.cat((shape,shape),2)
-        shape[:,:,5]=-shape[:,:,5]
-        shape = shape.view(-1,14,3)
-        projected_points = orthographic_proj_withz(shape, rt[:,0:7], ratio_all)
+    def loss_kgnn3d(self, keypoint_kgnn2d, valid, projected_points):
+        keypoint_kgnn2d = keypoint_kgnn2d.type(torch.FloatTensor).cuda()
+        projected_points = projected_points.type(torch.FloatTensor).cuda()
         keypoint_kgnn2d = keypoint_kgnn2d*valid.unsqueeze(2).type(torch.FloatTensor).cuda()
         projected_points = projected_points*valid.unsqueeze(2).type(torch.FloatTensor).cuda()
         #print(projected_points)
