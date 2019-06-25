@@ -40,6 +40,8 @@ def heatmaps_to_graph(heatmaps):
       index_x = index - index_y.mul(width)
       index_y = index_y.type(torch.cuda.FloatTensor).view(count,num_keypoints,1)
       index_x = index_x.type(torch.cuda.FloatTensor).view(count,num_keypoints,1)
+      index_y = (index_y - (width/2))/(width/2)
+      index_x = (index_x - (width/2))/(width/2)
       values = values.type(torch.cuda.FloatTensor).view(count,num_keypoints,1)
 
       graph_features = torch.cat((index_x,index_y,values),2)

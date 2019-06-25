@@ -42,7 +42,6 @@ class ROIGraphHead(torch.nn.Module):
         if self.training:
             with torch.no_grad():
                 proposals = self.loss_evaluator_heatmap.subsample(proposals, targets)
-
         ## heatmaps computation
         x = self.feature_extractor_heatmap(features,proposals)
         kp_logits = self.predictor_heatmap(x)
@@ -66,12 +65,13 @@ class ROIGraphHead(torch.nn.Module):
 
         edge_logits,KGNN2D,KGNN3D = self.feature_extractor(graph_features,ratio)
         if not self.training:
-            #print(graph_features[0])
-            #print(KGNN2D[0])
+            print(graph_features[0])
+            print(KGNN2D[0])
             #print(edge_logits[0])
             #asas
-            result = self.post_processor(KGNN2D, edge_logits, proposals)
             result = self.post_processor(KGNN3D, edge_logits, proposals)
+            print(result[0])
+            result = self.post_processor(KGNN2D, edge_logits, proposals)
             result = self.post_processor(graph_features, edge_logits, proposals)
             return KGNN2D, result, {}
 

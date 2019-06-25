@@ -85,8 +85,8 @@ def graphs_to_keypoints(graphs, edges, rois):
         width_correction = widths[i] / roi_map_width
         height_correction = heights[i] / roi_map_height
 
-        x_int = np.transpose(graphs[i,:,0]) * roi_map_width/56
-        y_int = graphs[i,:,1] * roi_map_height/56 
+        x_int = np.transpose(graphs[i,:,0]+1) * (roi_map_width/2)
+        y_int = (graphs[i,:,1]+1) * (roi_map_height/2)
         
         x = (x_int + 0.5) * width_correction
         y = (y_int + 0.5) * height_correction
