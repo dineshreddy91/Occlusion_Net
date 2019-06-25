@@ -185,7 +185,7 @@ class graphRCNNFeatureExtractor(nn.Module):
         KGNN2D = self.decoder(x, edges, self.rel_rec, self.rel_send,0)# args.prediction_steps)
         rt = self.encoder_rt(x, self.rel_rec, self.rel_send)
         shape_basis = rt[:,7:]
-        shape = self.mean_shape# + shape_basis@(self.pca_component)
+        shape = self.mean_shape + shape_basis@(self.pca_component)
         shape = shape.view(-1,6,3)
         shape = torch.cat((shape,shape),2)
         shape[:,:,5]=-shape[:,:,5]
