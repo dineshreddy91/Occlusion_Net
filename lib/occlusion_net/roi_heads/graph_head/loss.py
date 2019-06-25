@@ -22,10 +22,10 @@ def keypoints_scaled(keypoints, rois, heatmap_size , bb_pad):
 
     width = rois[:, 2] - rois[:, 0]
     height = rois[:, 3] - rois[:, 1]
-    offset_x = rois[:, 0]-width*bb_pad
-    offset_y = rois[:, 1]-height*bb_pad
-    scale_x = heatmap_size / (width*(1+bb_pad))
-    scale_y = heatmap_size / (height*(1+bb_pad))
+    offset_x = rois[:, 0]
+    offset_y = rois[:, 1]
+    scale_x = heatmap_size / width
+    scale_y = heatmap_size / height
 
     offset_x = offset_x[:, None]
     offset_y = offset_y[:, None]
@@ -37,10 +37,10 @@ def keypoints_scaled(keypoints, rois, heatmap_size , bb_pad):
     x_boundary_inds = x == rois[:, 2][:, None]
     y_boundary_inds = y == rois[:, 3][:, None]
 
-    x = (x - offset_x) * scale_x
-    x = x.floor().long()
-    y = (y - offset_y) * scale_y
-    y = y.floor().long()
+    x_float = (x - offset_x) * scale_x
+    x = x_float.floor().long()
+    y_float = (y - offset_y) * scale_y
+    y = y_float.floor().long()
     
     x[x_boundary_inds] = heatmap_size - 1
     y[y_boundary_inds] = heatmap_size - 1
@@ -50,6 +50,11 @@ def keypoints_scaled(keypoints, rois, heatmap_size , bb_pad):
     invis = keypoints[..., 2] == 1
     valid_vis = (valid_loc & vis).long()
     valid_invis = (valid_loc & invis).long()
+
+    # transform to normalize to graph 
+    x = (x_float - (heatmap_size/2))/(heatmap_size/2)
+    y = (y_float - (heatmap_size/2))/(heatmap_size/2)
+
     squashed = torch.cat([x.view(-1,x.shape[0],x.shape[1]),y.view(-1,y.shape[0],y.shape[1])])
     return squashed, valid_vis, valid_invis
 
@@ -211,7 +216,7 @@ class KeypointRCNNLossComputation(object):
         keypoints_logits = keypoints_logits.type(torch.FloatTensor)*valid_points.unsqueeze(2).type(torch.FloatTensor)
         keypoints_gt = keypoints_gt.cuda()
         keypoints_logits = keypoints_logits.cuda()
-        loss_occ = nll_gaussian(keypoints_gt[:,:,0:2], keypoints_logits[:,:,0:2] , 3)
+        loss_occ = nll_gaussian(keypoints_gt[:,:,0:2], keypoints_logits[:,:,0:2] , 0.1)
         return loss_occ
 
 
