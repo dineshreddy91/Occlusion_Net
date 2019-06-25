@@ -65,17 +65,10 @@ class ROIGraphHead(torch.nn.Module):
 
         edge_logits,KGNN2D,KGNN3D = self.feature_extractor(graph_features,ratio)
         if not self.training:
-            print(graph_features[0])
-            print(KGNN2D[0])
-            #print(edge_logits[0])
-            #asas
             result = self.post_processor(KGNN3D, edge_logits, proposals)
-            print(result[0])
             result = self.post_processor(KGNN2D, edge_logits, proposals)
             result = self.post_processor(graph_features, edge_logits, proposals)
             return KGNN2D, result, {}
-
-
        
         ## process groundtruth proposals
         keypoints_gt, valid_vis_all, valid_invis_all = self.loss_evaluator.process_keypoints(proposals)
