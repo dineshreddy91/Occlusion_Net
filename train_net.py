@@ -165,7 +165,7 @@ def main():
     parser = argparse.ArgumentParser(description="PyTorch Object Detection Training")
     parser.add_argument(
         "--config-file",
-        default="occlusion-net.yaml",
+        default="data/occlusion_net_train.yaml",
         metavar="FILE",
         help="path to config file",
         type=str,

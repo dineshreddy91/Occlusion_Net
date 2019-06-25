@@ -1,7 +1,6 @@
 MODEL:
   META_ARCHITECTURE: "GeneralizedRCNN"
-  WEIGHT: "catalog://ImageNetPretrained/MSRA/R-50"
-  #WEIGHT: "./log/model_0005000.pth"
+  WEIGHT: "./data/occlusion_net.pth"
   BACKBONE:
     CONV_BODY: "R-50-FPN"
   RESNETS:
