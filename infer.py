@@ -99,8 +99,8 @@ def main():
         #predictions = coco_demo.compute_prediction(img)
         #top_predictions = coco_demo.select_top_predictions(predictions)
         #print(top_predictions.get_field("keypoints").Keypoints[0])
-        #try:
-        if 2>1:
+        try:
+        #if 2>1:
             predictions = coco_demo.compute_prediction(img)
             top_predictions = coco_demo.select_top_predictions(predictions)
 
@@ -121,8 +121,8 @@ def main():
             # visualize the results
             if save_image:
                 result = np.copy(img)
-                result = coco_demo.overlay_boxes(result, top_predictions)
-                result = coco_demo.overlay_class_names(result, top_predictions)
+                #result = coco_demo.overlay_boxes(result, top_predictions)
+                #result = coco_demo.overlay_class_names(result, top_predictions)
                 if cfg.MODEL.KEYPOINT_ON:
                      if target == 'person':
                         result = coco_demo.overlay_keypoints(result, top_predictions, target='person')
@@ -130,9 +130,9 @@ def main():
                         result = coco_demo.overlay_keypoints(result, top_predictions, target='car')
                 cv2.imwrite(os.path.join(output_dir, url.split('/')[-1]), result)
                 print(os.path.join(output_dir, url.split('/')[-1]))
-        #except:
-        #    print('Fail to infer for image {}. Skipped.'.format(url))
-        #    continue
+        except:
+            print('Fail to infer for image {}. Skipped.'.format(url))
+            continue
     print(now)
     now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     print(now)
