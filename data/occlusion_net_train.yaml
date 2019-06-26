@@ -1,6 +1,7 @@
 MODEL:
   META_ARCHITECTURE: "GeneralizedRCNN"
-  WEIGHT: "catalog://ImageNetPretrained/MSRA/R-50"
+  #WEIGHT: "catalog://ImageNetPretrained/MSRA/R-50"
+  WEIGHT: "./log_old/log/model_0200000.pth"
   BACKBONE:
     CONV_BODY: "R-50-FPN"
   RESNETS:
@@ -35,9 +36,10 @@ MODEL:
   ROI_GRAPH_HEAD:
     FEATURE_EXTRACTOR: "graphRCNNFeatureExtractor"
     SHARE_BOX_FEATURE_EXTRACTOR: False
+    KGNN2D: True
 DATASETS:
-  TRAIN: ("keypoints_carfusion_test_cocostyle", )
-  TEST: ("keypoints_carfusion_train_cocostyle",)
+  TRAIN: ("keypoints_carfusion_train_cocostyle", )
+  TEST: ("keypoints_carfusion_test_cocostyle",)
 INPUT:
   MIN_SIZE_TRAIN: (640, 672, 704, 736, 768, 800)
 DATALOADER:

@@ -35,6 +35,7 @@ MODEL:
   ROI_GRAPH_HEAD:
     FEATURE_EXTRACTOR: "graphRCNNFeatureExtractor"
     SHARE_BOX_FEATURE_EXTRACTOR: False
+    KGNN2D: True
 DATASETS:
   TRAIN: ("keypoints_carfusion_test_cocostyle", )
   TEST: ("keypoints_carfusion_train_cocostyle",)
