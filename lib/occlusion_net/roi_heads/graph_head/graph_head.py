@@ -23,6 +23,9 @@ class ROIGraphHead(torch.nn.Module):
         self.post_processor_heatmap = make_roi_keypoint_post_processor(cfg)
         self.loss_evaluator_heatmap = make_roi_keypoint_loss_evaluator(cfg)
         self.loss_evaluator = make_roi_graph_loss_evaluator(cfg)
+        self.edges = cfg.MODEL.ROI_GRAPH_HEAD.EDGES 
+        self.KGNN2D = cfg.MODEL.ROI_GRAPH_HEAD.KGNN2D
+        self.KGNN3D = cfg.MODEL.ROI_GRAPH_HEAD.KGNN3D
 
     def forward(self, features, proposals, targets=None):
         """
@@ -65,32 +68,39 @@ class ROIGraphHead(torch.nn.Module):
 
         edge_logits,KGNN2D,KGNN3D = self.feature_extractor(graph_features,ratio)
         if not self.training:
-            result = self.post_processor(KGNN3D, edge_logits, proposals)
-            result = self.post_processor(KGNN2D, edge_logits, proposals)
-            result = self.post_processor(graph_features, edge_logits, proposals)
-            return KGNN2D, result, {}
+            output = graph_features
+            if self.edges == True:
+                result = self.post_processor(graph_features, edge_logits, proposals)
+                output = graph_features
+            if self.KGNN2D == True:
+                result = self.post_processor(KGNN2D, edge_logits, proposals)
+                output = KGNN2D
+            if self.KGNN3D ==True:
+                result = self.post_processor(KGNN3D, edge_logits, proposals)
+                output = KGNN3D
+            return output, result, {}
        
         ## process groundtruth proposals
         keypoints_gt, valid_vis_all, valid_invis_all = self.loss_evaluator.process_keypoints(proposals)
-        #print(valid_vis_all)
-        #print(valid_invis_all)
         valid_all = valid_vis_all+valid_invis_all 
-        #print(valid_all)
 
         ## loss computation
         loss_kp = self.loss_evaluator_heatmap(proposals, kp_logits)
-        #print(valid_all)
-        loss_edges = self.loss_evaluator.loss_edges(valid_vis_all, edge_logits)
-        loss_trifocal = self.loss_evaluator.loss_kgnn2d(keypoints_gt,valid_all, KGNN2D)
-        #print(rtb_KGNN3D)
-        valid_all = (valid_vis_all+valid_invis_all)*0 +1 
-        valid_all[:,-1] = valid_all[:,-1]*0 # dont compute loss in kgnn3d for center point
-        valid_all[:,8] = valid_all[:,8]*0 # dont compute the loss for exhaust
-        loss_kgnn3d = self.loss_evaluator.loss_kgnn3d(KGNN2D, valid_all, KGNN3D)
-        #loss_kgnn3d = self.loss_evaluator.loss_kgnn3d(KGNN3D, valid_all, KGNN2D)
-        #return KGNN2D, proposals, dict(loss_edges=loss_edges,loss_kp=loss_kp,loss_kgnn2d=loss_kgnn2d)
-        return KGNN2D, proposals, dict(loss_edges=loss_edges,loss_kp=loss_kp,loss_trifocal=loss_trifocal,loss_kgnn3d=loss_kgnn3d)
-        #return KGNN2D, proposals, dict(loss_kgnn2d=loss_kgnn2d, loss_edges=loss_edges)
+        
+        if self.edges == True:
+           loss_edges = self.loss_evaluator.loss_edges(valid_vis_all, edge_logits)
+           loss_dict_all = dict(loss_edges=loss_edges,loss_kp=loss_kp)
+        if self.KGNN2D ==True:
+           loss_trifocal = self.loss_evaluator.loss_kgnn2d(keypoints_gt,valid_invis_all, KGNN2D)
+           loss_dict_all = dict(loss_edges=loss_edges,loss_kp=loss_kp,loss_trifocal=loss_trifocal)
+        if self.KGNN3D ==True:
+           valid_all = (valid_vis_all+valid_invis_all)*0 +1 
+           valid_all[:,-1] = valid_all[:,-1]*0 # dont compute loss in kgnn3d for center point
+           valid_all[:,8] = valid_all[:,8]*0 # dont compute the loss for exhaust        
+           loss_kgnn3d = self.loss_evaluator.loss_kgnn3d(KGNN2D, valid_all, KGNN3D)
+           loss_dict_all = dict(loss_edges=loss_edges,loss_kp=loss_kp,loss_trifocal=loss_trifocal,loss_kgnn3d=loss_kgnn3d)
+
+        return KGNN2D, proposals, loss_dict_all
 
 
 def build_roi_graph_head(cfg, in_channels):
