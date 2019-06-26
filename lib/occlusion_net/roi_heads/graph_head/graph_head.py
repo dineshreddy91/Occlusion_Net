@@ -67,6 +67,7 @@ class ROIGraphHead(torch.nn.Module):
                  ratio = torch.cat((ratio,width/height))
 
         edge_logits,KGNN2D,KGNN3D = self.feature_extractor(graph_features,ratio)
+
         if not self.training:
             output = graph_features
             if self.edges == True:
