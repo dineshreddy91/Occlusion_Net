@@ -42,6 +42,9 @@ def parse_args():
     )
     parser.add_argument(
         '-v', '--visualize', type=distutils.util.strtobool, default=False)
+    parser.add_argument(
+        '-vis_color', default='rainbow')
+
 
     args = parser.parse_args()
     return args
@@ -65,6 +68,7 @@ def main():
     save_image = True if args.visualize else False
 
     target = args.target
+    vis_color = args.vis_color
 
     # update the config options with the config file
     cfg.merge_from_file(config_file)
@@ -125,9 +129,9 @@ def main():
                 #result = coco_demo.overlay_class_names(result, top_predictions)
                 if cfg.MODEL.KEYPOINT_ON:
                      if target == 'person':
-                        result = coco_demo.overlay_keypoints(result, top_predictions, target='person')
+                        result = coco_demo.overlay_keypoints_graph(result, top_predictions, target='person')
                      if target == 'car':
-                        result = coco_demo.overlay_keypoints(result, top_predictions, target='car')
+                        result = coco_demo.overlay_keypoints_graph(result, top_predictions,vis_color , target='car')
                 cv2.imwrite(os.path.join(output_dir, url.split('/')[-1]), result)
                 print(os.path.join(output_dir, url.split('/')[-1]))
         except:

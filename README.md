@@ -22,6 +22,7 @@ nvidia-docker build -t occlusion_net .
 ```
 
 ### Setting up data
+Follow the steps to download the carfusion dataset and setup at the 
 ```
 git clone https://github.com/dineshreddy91/carfusion_to_coco
 cd carfusion_to_coco
@@ -32,10 +33,26 @@ pip install -r requirements.txt
 sh carfusion_coco_setup.sh
 deactivate
 ```
+
+
 ### Running with docker
+
+
 ```
-docker run -v $PWD:/code -v /media/Car:/media/Car --shm-size=32GB --runtime=nvidia -it occlusion_net:latest
+sh train.sh occlusion_net
 ``` 
+
+
+### Testing on a sample image
+Download a pretrained model from  [[Google Drive](https://drive.google.com/open?id=1EUmhzeuMUnv5whv0ZmmOHTbtUiWdeDly)]
+
+Results on a sample demo image
+
+```
+sh test.sh occlusion_net demo/demo.jpg
+``` 
+
+
 
 
 

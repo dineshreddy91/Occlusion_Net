@@ -313,14 +313,18 @@ class COCODemo(object):
                 image = vis_keypoints_person(image, region.transpose((1, 0)))
         return image
 
-    def overlay_keypoints_graph(self, image, predictions, target='car'):
+    def overlay_keypoints_graph(self, image, predictions, color, target='car'):
         keypoints = predictions.get_field("keypoints")
         kps = keypoints.keypoints
         scores = keypoints.get_field("logits")
         kps = torch.cat((kps[:, :, 0:2], scores[:, :, None]), dim=2).numpy()
         for region in kps:
             if target == 'car':
-                image = vis_keypoints(image, region.transpose((1, 0)),kp_thresh = -10)
+                if color == 'occlusion':
+                    image = vis_keypoints_car_vis(image, region.transpose((1, 0)),kp_thresh = 10)
+                    image = vis_keypoints_car_invis(image, region.transpose((1, 0)),kp_thresh = 10)
+                if color == 'rainbow':
+                    image = vis_keypoints_car_rainbow(image, region.transpose((1, 0)),kp_thresh = -10)
             elif target == 'person':
                 image = vis_keypoints_person(image, region.transpose((1, 0)))
         return image
@@ -392,7 +396,7 @@ import matplotlib.pyplot as plt
 from lib.data_loader.datasets.keypoint import VehicleKeypoints
 from lib.data_loader.datasets.keypoint import PersonKeypoints
 
-def vis_keypoints(img, kps, kp_thresh=2, alpha=0.7):
+def vis_keypoints_car_vis(img, kps, kp_thresh=2, alpha=1):
     """Visualizes keypoints (adapted from vis_one_image).
     kps has shape (4, #keypoints) where 4 rows are (x, y, logit, prob).
     """
@@ -404,12 +408,20 @@ def vis_keypoints(img, kps, kp_thresh=2, alpha=0.7):
     cmap = plt.get_cmap('rainbow')
     colors = [cmap(i) for i in np.linspace(0, 1, 5)]
     colors = [(c[2] * 255, c[1] * 255, c[0] * 255) for c in colors]
+
+## Beautiful colors made by zensors
     colors[3] = (0,0,255)
     colors[0] = (0,255,0)
     colors[1] = (224,123,153) # purple
     colors[4] = (255,128,0)
     colors[2] = (34,194,244)
-#    colors[2] = (255,255,255)
+## colors to show occlusions
+    colors[3] = (0,255,0)
+    colors[0] = (0,255,0)
+    colors[1] = (0,255,0) # purple
+    colors[4] = (0,255,0)
+    colors[2] = (0,255,0)
+
     colors_index = [0,0,0,0,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4]
     bb_width  = max(kps[1])-min(kps[1])
     bb_height  = max(kps[2])-min(kps[2])
@@ -441,7 +453,64 @@ def vis_keypoints(img, kps, kp_thresh=2, alpha=0.7):
     # Blend the keypoints.
     return cv2.addWeighted(img, 1.0 - alpha, kp_mask, alpha, 0)
 
-def vis_keypoints_rainbow(img, kps, kp_thresh=10, alpha=0.7):
+
+def vis_keypoints_car_invis(img, kps, kp_thresh=2, alpha=0.5):
+    """Visualizes keypoints (adapted from vis_one_image).
+    kps has shape (4, #keypoints) where 4 rows are (x, y, logit, prob).
+    """
+    dataset_keypoints = VehicleKeypoints.NAMES
+    kp_lines = VehicleKeypoints.CONNECTIONS
+
+
+    # Convert from plt 0-1 RGBA colors to 0-255 BGR colors for opencv.
+    cmap = plt.get_cmap('rainbow')
+    colors = [cmap(i) for i in np.linspace(0, 1, 5)]
+    colors = [(c[2] * 255, c[1] * 255, c[0] * 255) for c in colors]
+## Beautiful colors made by zensors
+    colors[3] = (0,0,255)
+    colors[0] = (0,255,0)
+    colors[1] = (224,123,153) # purple
+    colors[4] = (255,128,0)
+    colors[2] = (34,194,244)
+## colors to show occlusions
+    colors[3] = (0,0,255)
+    colors[0] = (0,0,255)
+    colors[1] = (0,0,255) # purple
+    colors[4] = (0,0,255)
+    colors[2] = (0,0,255)
+   
+    colors_index = [0,0,0,0,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4]
+    bb_width  = max(kps[1])-min(kps[1])
+    bb_height  = max(kps[2])-min(kps[2])
+    bb_size = int(np.sqrt(bb_width*bb_width + bb_height*bb_height))
+
+
+    # Perform the drawing on a copy of the image, to allow for blending.
+    kp_mask = np.copy(img)
+
+    # Draw the keypoints.
+    for l in range(len(kp_lines)):
+        i1 = kp_lines[l][0]
+        i2 = kp_lines[l][1]
+        p1 = kps[0, i1], kps[1, i1]
+        p2 = kps[0, i2], kps[1, i2]
+        if kps[2, i1] < kp_thresh and kps[2, i2] < kp_thresh:
+            cv2.line(
+                kp_mask, p1, p2,
+                color=colors[colors_index[l]], thickness=3, lineType=cv2.LINE_AA)
+        if kps[2, i1] < kp_thresh and l<4:
+            cv2.circle(
+                kp_mask, p1,
+                radius=3, color=colors[0], thickness=int(bb_size/10), lineType=cv2.LINE_AA)
+        if kps[2, i2] < kp_thresh and l<4:
+            cv2.circle(
+                kp_mask, p2,
+                radius=3, color=colors[0], thickness=int(bb_size/10), lineType=cv2.LINE_AA)
+
+    # Blend the keypoints.
+    return cv2.addWeighted(img, 1.0 - alpha, kp_mask, alpha, 0)
+
+def vis_keypoints_car_rainbow(img, kps, kp_thresh=10, alpha=0.7):
     """Visualizes keypoints (adapted from vis_one_image).
     kps has shape (4, #keypoints) where 4 rows are (x, y, logit, prob).
     """
