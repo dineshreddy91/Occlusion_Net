@@ -37,9 +37,10 @@ deactivate
 
 ### Running with docker
 
+Training the model on the carfusion dataset 
 
 ```
-sh train.sh occlusion_net
+sh train.sh occlusion_net <Path_to_Carfusion_dataset>
 ``` 
 
 
@@ -50,7 +51,7 @@ Results on a sample demo image
 
 ```
 sh test.sh occlusion_net demo/demo.jpg
-``` 
+```
 
 
 

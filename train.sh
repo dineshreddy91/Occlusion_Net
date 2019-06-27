@@ -1,5 +1,4 @@
-BASE=/media/Car/car_datasets/images/carfusion/
-
+BASE=$2
 docker run -v $PWD:/code \
         -v $BASE/annotations:/code/datasets/carfusion/annotations \
         -v $BASE/train:/code/datasets/carfusion/train \

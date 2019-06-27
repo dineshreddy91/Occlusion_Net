@@ -7,18 +7,12 @@ Basic training script for PyTorch
 
 import os
 
-USE_COMETML = True#(os.environ.get("USE_COMETML", "false") == "true")
+USE_COMETML = True 
 if USE_COMETML==True:
    from comet_ml import Experiment, ExistingExperiment
    import os
    from lib.trainer_cometml import do_train
-   if 'COMET_EXP_KEY' in os.environ:
-       experiment = ExistingExperiment(api_key=os.environ['COMET_API_KEY'],
-                   previous_experiment=os.environ['COMET_EXP_KEY'],
-                   log_code=True, log_graph=True, auto_param_logging=True, auto_metric_logging=True,
-                   parse_args=True, auto_output_logging=True, log_env_detail=True, log_env_gpu=True)
-   else:
-       experiment = Experiment(api_key="LiWwy9jFgECvuJrPYK3c9qEvC",
+   experiment = Experiment(api_key="LiWwy9jFgECvuJrPYK3c9qEvC",
                         project_name="combined-keypoints", workspace="anuraag")
 else:
    from maskrcnn_benchmark.engine.trainer import do_train
@@ -69,7 +63,6 @@ def train(cfg, local_rank, distributed):
     use_mixed_precision = cfg.DTYPE == "float16"
     amp_opt_level = 'O1' if use_mixed_precision else 'O0'
     model, optimizer = amp.initialize(model, optimizer, opt_level=amp_opt_level)
-
     if distributed:
         model = torch.nn.parallel.DistributedDataParallel(
             model, find_unused_parameters=True, device_ids=[local_rank], output_device=local_rank,
