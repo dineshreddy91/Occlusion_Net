@@ -6,20 +6,6 @@ Basic training script for PyTorch
 
 
 import os
-
-USE_COMETML = True 
-if USE_COMETML==True:
-   from comet_ml import Experiment, ExistingExperiment
-   import os
-   from lib.trainer_cometml import do_train
-   experiment = Experiment(api_key="LiWwy9jFgECvuJrPYK3c9qEvC",
-                        project_name="combined-keypoints", workspace="anuraag")
-else:
-   from maskrcnn_benchmark.engine.trainer import do_train
-
-
-
-
 # Set up custom environment before nearly anything else is imported
 # NOTE: this should be the first import (no not reorder)
 from maskrcnn_benchmark.utils.env import setup_environment  # noqa F401 isort:skip
@@ -43,6 +29,8 @@ from lib.data_loader import make_data_loader
 from lib.config import cfg
 from lib.inference import inference
 from lib.occlusion_net.detector import build_detection_model
+from lib.trainer import do_train
+
 try:
     from apex import amp
 except ImportError:
@@ -90,7 +78,6 @@ def train(cfg, local_rank, distributed):
     )
 
     checkpoint_period = cfg.SOLVER.CHECKPOINT_PERIOD
-    if USE_COMETML ==True:
       data_loader_val = make_data_loader(cfg, is_train=False, is_distributed=distributed)
       data_loader_val = data_loader_val[0]
       do_train(
@@ -103,21 +90,7 @@ def train(cfg, local_rank, distributed):
         device,
         checkpoint_period,
         arguments,
-        experiment,
         output_dir,
-      )
-
-    else:
-      do_train(
-        model,
-        data_loader_train,
-        optimizer,
-        scheduler,
-        checkpointer,
-        device,
-        checkpoint_period,
-        arguments,
-      )
 
     return model
 
@@ -184,8 +157,6 @@ def main():
         nargs=argparse.REMAINDER,
     )
     args = parser.parse_args()
-    if USE_COMETML == True:
-        experiment.add_tag(args.cometml_tag)
 
     num_gpus = int(os.environ["WORLD_SIZE"]) if "WORLD_SIZE" in os.environ else 1
     args.distributed = num_gpus > 1
