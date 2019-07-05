@@ -44,42 +44,36 @@ The final folder format to train on carfusion data needs to look :
 
  ```text
 Occlusion-Net
-│
     └─datasets
         └─carfusion
             └─train
                 └─car_craig1
                     └───images
-│   │                    01_0000.jpg
-│   │                    01_0001.jpg
-|   |                    ...
-│   
+                        01_0000.jpg
+                        01_0001.jpg
+                        ...   
                     └───bb
-|   │                   01_0000.txt
-|   │                   01_0001.txt
-|   |                   ...
-|
+                       01_0000.txt
+                       01_0001.txt
+                       ...
                     └───gt
-     │                  01_0000.txt
-     │                  01_0001.txt
-     |                  ...
+                       01_0000.txt   
+                       01_0001.txt
+                       ...
             └─test
-                └─car_craig1
+                └─car_penn1
                     └───images
-│   │                    01_0000.jpg
-│   │                    01_0001.jpg
-|   |                    ...
-│   
+                        01_0000.jpg
+                        01_0001.jpg
+                        ...   
                     └───bb
-|   │                   01_0000.txt
-|   │                   01_0001.txt
-|   |                   ...
-|
+                       01_0000.txt
+                       01_0001.txt
+                       ...
                     └───gt
-     │                  01_0000.txt
-     │                  01_0001.txt
-     |                  ...
-
+                       01_0000.txt   
+                       01_0001.txt
+                       ...
             └─annotations
                 car_keypoints_train.json
                 car_keypoints_test.json
