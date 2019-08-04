@@ -124,11 +124,11 @@ def do_train(
                     memory=torch.cuda.max_memory_allocated() / 1024.0 / 1024.0,
                 )
             )
-         if iteration % checkpoint_period == 0:
+        if iteration % checkpoint_period == 0:
             name="model_{:07d}".format(iteration)
             path = os.path.join(output_dir, "{}.pth".format(name))
             checkpointer.save(name, **arguments)
-         if iteration == max_iter:
+        if iteration == max_iter:
             checkpointer.save("model_final", **arguments)
 
 

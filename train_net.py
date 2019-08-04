@@ -27,7 +27,6 @@ from maskrcnn_benchmark.utils.miscellaneous import mkdir
 
 from lib.data_loader import make_data_loader
 from lib.config import cfg
-from lib.inference import inference
 from lib.occlusion_net.detector import build_detection_model
 from lib.trainer import do_train
 
@@ -78,9 +77,9 @@ def train(cfg, local_rank, distributed):
     )
 
     checkpoint_period = cfg.SOLVER.CHECKPOINT_PERIOD
-      data_loader_val = make_data_loader(cfg, is_train=False, is_distributed=distributed)
-      data_loader_val = data_loader_val[0]
-      do_train(
+    data_loader_val = make_data_loader(cfg, is_train=False, is_distributed=distributed)
+    data_loader_val = data_loader_val[0]
+    do_train(
         model,
         data_loader_train,
         data_loader_val,
@@ -91,6 +90,7 @@ def train(cfg, local_rank, distributed):
         checkpoint_period,
         arguments,
         output_dir,
+        )
 
     return model
 
