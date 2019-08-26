@@ -11,7 +11,7 @@ IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2019.
 <p align="center">
     [<img src="http://img.youtube.com/vi/1EiC9bvVGnk/0.jpg", width="600">](https://www.youtube.com/embed/v3dcMKbw_wI)
 </p>
-(https://youtu.be/<VIDEO ID>)
+
 ### More Results
 <p align="center">
     <img src="data/demo1.gif", width="600">
