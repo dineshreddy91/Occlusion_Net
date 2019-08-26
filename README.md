@@ -12,7 +12,7 @@ IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2019.
 
 ### More Results
 <p>
-<img src="data/demo1.gif", width="800">
+<img src="data/demo1.gif", width="900">
 <br>
 <sup>Result of Occlusion-Net on a live video from youtube</sup>
 </p>
