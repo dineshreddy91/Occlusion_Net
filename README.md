@@ -11,11 +11,13 @@ IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2019.
 [<img src="https://img.youtube.com/vi/v3dcMKbw_wI/maxresdefault.jpg">](https://www.youtube.com/embed/v3dcMKbw_wI)
 
 ### More Results
-<p>
+<p align="center">
 <img src="data/demo1.gif", width="900">
 <br>
 <sup>Result of Occlusion-Net on a live video from youtube</sup>
 </p>
+
+
 ## Installation
 
 ### Setting up with docker
