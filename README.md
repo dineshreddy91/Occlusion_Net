@@ -9,8 +9,9 @@ IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2019.
 
 ### Live Demo of the algorithm on a youtube live stream
 
+[![Watch the video](https://img.youtube.com/vi/T-D1KVIuvjA/maxresdefault.jpg)](https://youtu.be/T-D1KVIuvjA)
+
 <p align="center">
-    [![Watch the video](https://img.youtube.com/vi/T-D1KVIuvjA/maxresdefault.jpg)](https://youtu.be/T-D1KVIuvjA)
     [![Live Demo](http://img.youtube.com/vi/1EiC9bvVGnk/0.jpg)](https://www.youtube.com/embed/v3dcMKbw_wI "Click to play the live Demo")
 </p>
 
