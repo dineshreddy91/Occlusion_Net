@@ -5,7 +5,7 @@ Occlusion-Net: 2D/3D Occluded Keypoint Localization Using Graph Networks
 
 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2019. 
 
-[[Project](http://www.cs.cmu.edu/~ILIM/projects/IM/CarFusion/cvpr2019/index.html)] [[Paper](http://www.cs.cmu.edu/~ILIM/publications/PDFs/RVN-CVPR19.pdf)] [[Supp](http://www.cs.cmu.edu/~ILIM/projects/IM/CarFusion/pdf/occlusion_net_supp.pdf)] [[Bibtex](http://www.cs.cmu.edu/~ILIM/projects/IM/CarFusion/occlusion_net.bib) ]
+[[Project](http://www.cs.cmu.edu/~ILIM/projects/IM/CarFusion/cvpr2019/index.html)] [[Paper](http://openaccess.thecvf.com/content_CVPR_2019/papers/Reddy_Occlusion-Net_2D3D_Occluded_Keypoint_Localization_Using_Graph_Networks_CVPR_2019_paper.pdf)] [[Supp](http://openaccess.thecvf.com/content_CVPR_2019/supplemental/Reddy_Occlusion-Net_2D3D_Occluded_CVPR_2019_supplemental.pdf)] [[Bibtex](http://www.cs.cmu.edu/~ILIM/projects/IM/CarFusion/cvpr2019/occlusion_net.bib) ]
 
 ### Live Demo of the algorithm on a youtube live stream can be found below or [[HERE](https://www.youtube.com/channel/UC8pHfBEGqPwPlC39Ju7spEQ/live) ]:
 [<img src="https://img.youtube.com/vi/1UI4Zs28V_E/maxresdefault.jpg">](https://www.youtube.com/channel/UC8pHfBEGqPwPlC39Ju7spEQ/live)
