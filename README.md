@@ -8,7 +8,7 @@ IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2019.
 [[Project](http://www.cs.cmu.edu/~ILIM/projects/IM/CarFusion/cvpr2019/index.html)] [[Paper](http://www.cs.cmu.edu/~ILIM/publications/PDFs/RVN-CVPR19.pdf)] [[Supp](http://www.cs.cmu.edu/~ILIM/projects/IM/CarFusion/pdf/occlusion_net_supp.pdf)] [[Bibtex](http://www.cs.cmu.edu/~ILIM/projects/IM/CarFusion/occlusion_net.bib) ]
 
 ### Live Demo of the algorithm on a youtube live stream can be found below or [[HERE](https://www.youtube.com/channel/UC8pHfBEGqPwPlC39Ju7spEQ/live) ]:
-[<img src="https://img.youtube.com/vi/J7G1WtUOXhQ/maxresdefault.jpg">](https://www.youtube.com/channel/UC8pHfBEGqPwPlC39Ju7spEQ/live)
+[<img src="https://img.youtube.com/vi/1UI4Zs28V_E/maxresdefault.jpg">](https://www.youtube.com/channel/UC8pHfBEGqPwPlC39Ju7spEQ/live)
 
 ### More Results
 <p align="center">
