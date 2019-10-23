@@ -33,7 +33,7 @@ nvidia-docker build -t occlusion_net .
 ```
 
 ### Setting up data
-Follow the steps to download the carfusion dataset and setup at the 
+You need to fill the [Access Form](https://forms.gle/FCUcbt3jD1hB6ja57) to get a email regarding the dataset and setup at using the following commands: 
 ```
 git clone https://github.com/dineshreddy91/carfusion_to_coco
 cd carfusion_to_coco
