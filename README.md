@@ -104,6 +104,16 @@ Results on a sample demo image
 sh test.sh occlusion_net demo/demo.jpg
 ```
 
+### Citation
+```
+@inproceedings{onet_cvpr19,
+author = {Reddy, N. Dinesh and Vo, Minh and Narasimhan, Srinivasa G.},
+title = {Occlusion-Net: 2D/3D Occluded Keypoint Localization Using Graph Networks},
+booktitle = {The IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+pages = {7326--7335},
+year = {2019}
+}
+```
 
 
 
