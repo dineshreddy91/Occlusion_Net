@@ -33,10 +33,10 @@ RUN pip install ninja yacs cython matplotlib opencv-python tqdm sklearn comet_ml
 
 # Install PyTorch 1.0 Nightly and OpenCV
 ARG CUDA
-RUN echo conda install pytorch==1.0 cudatoolkit=${CUDA} -c pytorch \
+RUN conda install -y pytorch==1.1.0 cudatoolkit=${CUDA} -c pytorch \
  && conda clean -ya
 
-RUN pip install https://download.pytorch.org/whl/cu100/torch-1.0.1.post2-cp36-cp36m-linux_x86_64.whl
+RUN pip install https://download.pytorch.org/whl/cu100/torch-1.1.0-cp36-cp36m-linux_x86_64.whl
 # Install TorchVision master
 RUN git clone --single-branch --branch v0.2.2_branch https://github.com/pytorch/vision.git \
  && cd vision \
