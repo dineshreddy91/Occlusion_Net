@@ -114,6 +114,13 @@ booktitle = {The IEEE Conference on Computer Vision and Pattern Recognition (CVP
 pages = {7326--7335},
 year = {2019}
 }
+@InProceedings{Reddy_2018_CVPR,
+author = {Dinesh Reddy, N. and Vo, Minh and Narasimhan, Srinivasa G.},
+title = {CarFusion: Combining Point Tracking and Part Detection for Dynamic 3D Reconstruction of Vehicles},
+booktitle = {The IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+month = {June},
+year = {2018}
+}
 ```
 
 
