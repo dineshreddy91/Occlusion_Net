@@ -11,14 +11,32 @@ min_keypoints_per_image = 10
 
 
 def _count_visible_keypoints(anno):
+    """
+    Return the number of visible keypoints.
+
+    Args:
+        anno: (todo): write your description
+    """
     return sum(sum(1 for v in ann["keypoints"][2::3] if v > 0) for ann in anno)
 
 
 def _has_only_empty_bbox(anno):
+    """
+    Return true if all all the bounding boxes have any empty.
+
+    Args:
+        anno: (todo): write your description
+    """
     return all(any(o <= 1 for o in obj["bbox"][2:]) for obj in anno)
 
 
 def has_valid_annotation(anno):
+    """
+    Check if an annotation has a valid annotations.
+
+    Args:
+        anno: (todo): write your description
+    """
     # if it's empty, there is no annotation
     if len(anno) == 0:
         return False
@@ -40,6 +58,16 @@ class CARFUSIONDataset(torchvision.datasets.coco.CocoDetection):
     def __init__(
         self, ann_file, root, remove_images_without_annotations, transforms=None
     ):
+        """
+        Initialize annotations.
+
+        Args:
+            self: (todo): write your description
+            ann_file: (str): write your description
+            root: (str): write your description
+            remove_images_without_annotations: (bool): write your description
+            transforms: (str): write your description
+        """
         super(CARFUSIONDataset, self).__init__(root, ann_file)
         # sort indices for reproducible results
         self.ids = sorted(self.ids)
@@ -64,6 +92,13 @@ class CARFUSIONDataset(torchvision.datasets.coco.CocoDetection):
         self.transforms = transforms
 
     def __getitem__(self, idx):
+        """
+        Extracts the image.
+
+        Args:
+            self: (todo): write your description
+            idx: (list): write your description
+        """
         img, anno = super(CARFUSIONDataset, self).__getitem__(idx)
 
         # filter crowd annotations
@@ -96,6 +131,13 @@ class CARFUSIONDataset(torchvision.datasets.coco.CocoDetection):
         return img, target, idx
 
     def get_img_info(self, index):
+        """
+        Get image info
+
+        Args:
+            self: (todo): write your description
+            index: (int): write your description
+        """
         img_id = self.id_to_img_map[index]
         img_data = self.coco.imgs[img_id]
         return img_data

@@ -4,10 +4,26 @@ from torch import nn
 
 class KeypointGraphPostProcessor(nn.Module):
     def __init__(self, keypointer=None):
+        """
+        Initialize keypointer.
+
+        Args:
+            self: (todo): write your description
+            keypointer: (str): write your description
+        """
         super(KeypointGraphPostProcessor, self).__init__()
         self.keypointer = keypointer
 
     def forward(self, x, edges, boxes):
+        """
+        Evaluates on each set of xscores.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+            edges: (todo): write your description
+            boxes: (list): write your description
+        """
         graph_prob = x
 
         scores = None
@@ -37,6 +53,13 @@ import numpy as np
 import cv2
 
 def edges_to_vis(edges,n_kps):
+    """
+    Convert edges to edges.
+
+    Args:
+        edges: (todo): write your description
+        n_kps: (int): write your description
+    """
     array = np.zeros([edges.shape[0], n_kps])
     array = torch.FloatTensor(array)
     for a in range(n_kps):
@@ -112,9 +135,25 @@ class Keypointer(object):
     """
 
     def __init__(self, padding=0):
+        """
+        Initialize a padding.
+
+        Args:
+            self: (todo): write your description
+            padding: (str): write your description
+        """
         self.padding = padding
 
     def __call__(self, graphs, edges, boxes):
+        """
+        Calls the graph. call.
+
+        Args:
+            self: (todo): write your description
+            graphs: (todo): write your description
+            edges: (list): write your description
+            boxes: (list): write your description
+        """
         # TODO do this properly
         if isinstance(boxes, BoxList):
             boxes = [boxes]
@@ -127,6 +166,12 @@ class Keypointer(object):
 
 
 def make_roi_graph_post_processor(cfg):
+    """
+    Make a post - post postprocessor.
+
+    Args:
+        cfg: (todo): write your description
+    """
     keypointer = Keypointer()
     keypoint_post_processor = KeypointGraphPostProcessor(keypointer)
     return keypoint_post_processor

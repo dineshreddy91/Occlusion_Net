@@ -17,6 +17,15 @@ import sys
 
 
 def keypoints_scaled(keypoints, rois, heatmap_size , bb_pad):
+    """
+    Return a keypoints object for a keypoints.
+
+    Args:
+        keypoints: (str): write your description
+        rois: (todo): write your description
+        heatmap_size: (int): write your description
+        bb_pad: (int): write your description
+    """
     if rois.numel() == 0:
         return rois.new().long(), rois.new().long(), rois.new().long(), rois.new().long()
 
@@ -59,11 +68,26 @@ def keypoints_scaled(keypoints, rois, heatmap_size , bb_pad):
     return squashed, valid_vis, valid_invis
 
 def keypoints_to_squash(keypoints, proposals, discretization_size, bb_pad):
+    """
+    Convert a list of keypoints.
+
+    Args:
+        keypoints: (array): write your description
+        proposals: (todo): write your description
+        discretization_size: (int): write your description
+        bb_pad: (int): write your description
+    """
     proposals = proposals.convert("xyxy")
     return keypoints_scaled(keypoints.keypoints, proposals.bbox, discretization_size, bb_pad)
 
 
 def cat_boxlist_with_keypoints(boxlists):
+    """
+    Returns a list of all the boxlists with the given boxlists.
+
+    Args:
+        boxlists: (todo): write your description
+    """
     assert all(boxlist.has_field("keypoints") for boxlist in boxlists)
 
     kp = [boxlist.get_field("keypoints").keypoints for boxlist in boxlists]
@@ -78,6 +102,15 @@ def cat_boxlist_with_keypoints(boxlists):
     return boxlists
 
 def nll_gaussian(preds, target, variance, add_const=False):
+    """
+    Calculate log - likelihood.
+
+    Args:
+        preds: (array): write your description
+        target: (todo): write your description
+        variance: (todo): write your description
+        add_const: (int): write your description
+    """
     neg_log_p = ((preds - target) ** 2 / (2 * variance))
     if add_const:
         const = 0.5 * np.log(2 * np.pi * variance)
@@ -114,6 +147,14 @@ class KeypointRCNNLossComputation(object):
         self.idx =  torch.LongTensor(np.where(off_diag)[1].reshape(cfg.MODEL.ROI_KEYPOINT_HEAD.NUM_CLASSES,cfg.MODEL.ROI_KEYPOINT_HEAD.NUM_CLASSES-1)).cuda()
 
     def match_targets_to_proposals(self, proposal, target):
+        """
+        Return a target to a target.
+
+        Args:
+            self: (todo): write your description
+            proposal: (todo): write your description
+            target: (todo): write your description
+        """
         match_quality_matrix = boxlist_iou(target, proposal)
         matched_idxs = self.proposal_matcher(match_quality_matrix)
         # Keypoint RCNN needs "labels" and "keypoints "fields for creating the targets
@@ -127,6 +168,14 @@ class KeypointRCNNLossComputation(object):
         return matched_targets
 
     def prepare_targets(self, proposals, targets):
+        """
+        Prepare the targets for the given targets.
+
+        Args:
+            self: (todo): write your description
+            proposals: (str): write your description
+            targets: (todo): write your description
+        """
         labels = []
         keypoints = []
         for proposals_per_image, targets_per_image in zip(proposals, targets):
@@ -194,6 +243,13 @@ class KeypointRCNNLossComputation(object):
 
     #def __call__(self, proposals, keypoint_logits):
     def process_keypoints(self, proposals):
+        """
+        Process keypoints.
+
+        Args:
+            self: (todo): write your description
+            proposals: (todo): write your description
+        """
         for inc, proposals_per_image in enumerate(proposals):
             kp = proposals_per_image.get_field("keypoints")
             keypoint_squashed = kp.keypoints
@@ -212,6 +268,15 @@ class KeypointRCNNLossComputation(object):
         return keypoints_gt,vis_all,invis_all
 
     def loss_kgnn2d(self, keypoints_gt, valid_points, keypoints_logits):
+        """
+        Compute the kgnn loss.
+
+        Args:
+            self: (todo): write your description
+            keypoints_gt: (array): write your description
+            valid_points: (str): write your description
+            keypoints_logits: (array): write your description
+        """
         keypoints_gt = keypoints_gt.type(torch.FloatTensor)*valid_points.unsqueeze(2).type(torch.FloatTensor)
         keypoints_logits = keypoints_logits.type(torch.FloatTensor)*valid_points.unsqueeze(2).type(torch.FloatTensor)
         keypoints_gt = keypoints_gt.cuda()
@@ -221,6 +286,14 @@ class KeypointRCNNLossComputation(object):
 
 
     def loss_edges(self, valid_points, edges):
+        """
+        Compute the loss loss.
+
+        Args:
+            self: (todo): write your description
+            valid_points: (todo): write your description
+            edges: (todo): write your description
+        """
         relations = torch.zeros(valid_points.shape[0],valid_points.shape[1]*(valid_points.shape[1]-1)).cuda()
         for count,vis in enumerate(valid_points):
             vis = vis.view(-1,1)
@@ -234,6 +307,14 @@ class KeypointRCNNLossComputation(object):
 
 
     def loss_edges_old(self, valid_points, edges):
+        """
+        Calculate loss.
+
+        Args:
+            self: (todo): write your description
+            valid_points: (todo): write your description
+            edges: (todo): write your description
+        """
         relations = torch.zeros(valid_points.shape[0],valid_points.shape[1]*(valid_points.shape[1]-1))
         count = 0
         for vis in valid_points:
@@ -259,6 +340,15 @@ class KeypointRCNNLossComputation(object):
 
 
     def loss_kgnn3d(self, keypoint_kgnn2d, valid, projected_points):
+        """
+        Compute kgnn3 loss.
+
+        Args:
+            self: (todo): write your description
+            keypoint_kgnn2d: (array): write your description
+            valid: (str): write your description
+            projected_points: (array): write your description
+        """
         keypoint_kgnn2d = keypoint_kgnn2d.type(torch.FloatTensor).cuda()
         projected_points = projected_points.type(torch.FloatTensor).cuda()
         keypoint_kgnn2d = keypoint_kgnn2d*valid.unsqueeze(2).type(torch.FloatTensor).cuda()
@@ -273,6 +363,12 @@ class KeypointRCNNLossComputation(object):
 
  
 def make_roi_graph_loss_evaluator(cfg):
+    """
+    Make a graph loss function.
+
+    Args:
+        cfg: (todo): write your description
+    """
     matcher = Matcher(
         cfg.MODEL.ROI_HEADS.FG_IOU_THRESHOLD,
         cfg.MODEL.ROI_HEADS.BG_IOU_THRESHOLD,

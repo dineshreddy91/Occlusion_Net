@@ -10,9 +10,23 @@ class BatchCollator(object):
     """
 
     def __init__(self, size_divisible=0):
+        """
+        Initialize the size.
+
+        Args:
+            self: (todo): write your description
+            size_divisible: (int): write your description
+        """
         self.size_divisible = size_divisible
 
     def __call__(self, batch):
+        """
+        Returns a batch of images.
+
+        Args:
+            self: (todo): write your description
+            batch: (todo): write your description
+        """
         transposed_batch = list(zip(*batch))
         images = to_image_list(transposed_batch[0], self.size_divisible)
         targets = transposed_batch[1]

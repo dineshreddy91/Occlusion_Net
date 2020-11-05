@@ -48,6 +48,21 @@ def do_train(
     arguments,
     output_dir,
 ):
+    """
+    Training function.
+
+    Args:
+        model: (todo): write your description
+        data_loader_train: (str): write your description
+        data_loader_val: (todo): write your description
+        optimizer: (todo): write your description
+        scheduler: (todo): write your description
+        checkpointer: (todo): write your description
+        device: (todo): write your description
+        checkpoint_period: (bool): write your description
+        arguments: (list): write your description
+        output_dir: (str): write your description
+    """
     logger = logging.getLogger("maskrcnn_benchmark.trainer")
     logger.info("Start training")
     meters = MetricLogger(delimiter="  ")

@@ -107,6 +107,17 @@ class COCODemo(object):
         masks_per_dim=2,
         min_image_size=224,
     ):
+        """
+        Initialize the device.
+
+        Args:
+            self: (todo): write your description
+            cfg: (todo): write your description
+            confidence_threshold: (float): write your description
+            show_mask_heatmaps: (bool): write your description
+            masks_per_dim: (int): write your description
+            min_image_size: (int): write your description
+        """
         self.cfg = cfg.clone()
         self.model = build_detection_model(cfg)
         self.model.eval()
@@ -302,6 +313,15 @@ class COCODemo(object):
         return composite
 
     def overlay_keypoints(self, image, predictions, target='car'):
+        """
+        Overlay keypoints in the image.
+
+        Args:
+            self: (todo): write your description
+            image: (array): write your description
+            predictions: (todo): write your description
+            target: (str): write your description
+        """
         keypoints = predictions.get_field("keypoints")
         kps = keypoints.keypoints
         scores = keypoints.get_field("logits")
@@ -314,6 +334,16 @@ class COCODemo(object):
         return image
 
     def overlay_keypoints_graph(self, image, predictions, color, target='car'):
+        """
+        Overlay keypoints on the image.
+
+        Args:
+            self: (todo): write your description
+            image: (array): write your description
+            predictions: (todo): write your description
+            color: (str): write your description
+            target: (todo): write your description
+        """
         keypoints = predictions.get_field("keypoints")
         kps = keypoints.keypoints
         scores = keypoints.get_field("logits")

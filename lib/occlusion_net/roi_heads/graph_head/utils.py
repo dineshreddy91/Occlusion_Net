@@ -8,6 +8,16 @@ from torch.distributions import Normal
 import matplotlib.pyplot as plt
 
 def count_pck(kps_gt,kps_computed,relations,alpha,bb_width):
+    """
+    Count the number of non - inertia.
+
+    Args:
+        kps_gt: (int): write your description
+        kps_computed: (bool): write your description
+        relations: (todo): write your description
+        alpha: (float): write your description
+        bb_width: (int): write your description
+    """
     diff = kps_gt[:,:,0:2] - kps_computed[:,:,0:2]
     diff = diff**2
     diff = torch.sum(diff,dim=2)
@@ -51,6 +61,13 @@ def make_one_hot(labels, C=2):
     return target
 
 def edge_accuracy(preds, target):
+    """
+    Calculate accuracy.
+
+    Args:
+        preds: (todo): write your description
+        target: (todo): write your description
+    """
     #_, preds = preds.max(-1)
     correct = preds.float().data.eq(
         target.float().data.view_as(preds)).cpu().sum()
@@ -64,6 +81,12 @@ def indices_to_one_hot(data, nb_classes):
 
 
 def encode_onehot(labels):
+    """
+    Encode a sequence of - hot - encoding.
+
+    Args:
+        labels: (array): write your description
+    """
     classes = set(labels)
     classes_dict = {c: np.identity(len(classes))[i, :] for i, c in
                     enumerate(classes)}
@@ -72,6 +95,15 @@ def encode_onehot(labels):
     return labels_onehot
 
 def nll_gaussian(preds, target, variance, add_const=False):
+    """
+    Calculate log - likelihood.
+
+    Args:
+        preds: (array): write your description
+        target: (todo): write your description
+        variance: (todo): write your description
+        add_const: (int): write your description
+    """
     neg_log_p = ((preds - target) ** 2 / (2 * variance))
     if add_const:
         const = 0.5 * np.log(2 * np.pi * variance)
@@ -79,6 +111,13 @@ def nll_gaussian(preds, target, variance, add_const=False):
     return neg_log_p.sum() / (target.size(0) * target.size(1))
 
 def edges_to_vis(edges,n_kps):
+    """
+    Convert edges to edges.
+
+    Args:
+        edges: (todo): write your description
+        n_kps: (int): write your description
+    """
     array = np.zeros([edges.shape[0], n_kps])
     array = torch.FloatTensor(array)
     array = Variable(array.cuda())
@@ -89,6 +128,13 @@ def edges_to_vis(edges,n_kps):
     return(array)
 
 def edges_to_vis_without_cuda(edges,n_kps):
+    """
+    Converts the edges to edges.
+
+    Args:
+        edges: (list): write your description
+        n_kps: (int): write your description
+    """
     array = np.zeros([edges.shape[0], n_kps])
     array = torch.FloatTensor(array)
     array = Variable(array)
@@ -99,6 +145,16 @@ def edges_to_vis_without_cuda(edges,n_kps):
     return(array)
 
 def nll_gaussian_visibility(preds, target, visibility, variance, add_const=False):
+    """
+    Calculate the nll of a gaussian.
+
+    Args:
+        preds: (array): write your description
+        target: (todo): write your description
+        visibility: (array): write your description
+        variance: (todo): write your description
+        add_const: (array): write your description
+    """
     diff = preds - target
     diff = visibility.unsqueeze(2).expand_as(diff)*diff
     neg_log_p = ((diff) ** 2 / (2 * variance))
@@ -108,11 +164,29 @@ def nll_gaussian_visibility(preds, target, visibility, variance, add_const=False
     return neg_log_p.sum() / (target.size(0) * target.size(1))
 
 def kl_categorical(preds, log_prior, num_atoms, eps=1e-16):
+    """
+    Calculate the kl divergence.
+
+    Args:
+        preds: (array): write your description
+        log_prior: (todo): write your description
+        num_atoms: (int): write your description
+        eps: (float): write your description
+    """
     kl_div = preds * (torch.log(preds + eps) - log_prior)
     return kl_div.sum() / (num_atoms * preds.size(0))
 
 
 def kl_categorical_uniform(preds, num_atoms, add_const=False, eps=1e-16):
+    """
+    R kl kl divergence.
+
+    Args:
+        preds: (array): write your description
+        num_atoms: (int): write your description
+        add_const: (array): write your description
+        eps: (float): write your description
+    """
     kl_div = preds * torch.log(preds + eps)
     if add_const:
         const = np.log(args.edge_types)
@@ -164,6 +238,13 @@ def sample_gumbel(shape, eps=1e-10):
     return - torch.log(eps - torch.log(U + eps))
 
 def my_softmax(input, axis=1):
+    """
+    Compute the softmax.
+
+    Args:
+        input: (array): write your description
+        axis: (int): write your description
+    """
     trans_input = input.transpose(axis, 0).contiguous()
     soft_max_1d = F.softmax(trans_input,dim=0)
     return soft_max_1d.transpose(axis, 0)
@@ -226,6 +307,14 @@ def gumbel_softmax(logits, tau=1, hard=False, eps=1e-10):
     return y
 
 def error_values(data_all,relations,gamma = 0.1):
+    """
+    Compute the variance of the variance.
+
+    Args:
+        data_all: (todo): write your description
+        relations: (todo): write your description
+        gamma: (todo): write your description
+    """
         data=data_all[:,:,0:2]
 
         variance = torch.rand(data.shape[0],data.shape[1], data.shape[2])*2 - 1
@@ -241,6 +330,12 @@ def error_values(data_all,relations,gamma = 0.1):
         return variance
 
 def error_values_old(data_all):
+    """
+    Calculate the error error.
+
+    Args:
+        data_all: (todo): write your description
+    """
         data=data_all[:,:,0:2]
         variance = torch.rand(data.shape[0],data.shape[1], data.shape[2])*2 -1
         for a,b in enumerate(variance[0]):
@@ -260,6 +355,13 @@ def get_tril_offdiag_indices(num_nodes):
     return tril_idx.nonzero()
 
 def load_data_vis(batch_size=1, suffix=''):
+    """
+    Load the data set.
+
+    Args:
+        batch_size: (int): write your description
+        suffix: (str): write your description
+    """
     loc_train = np.load('data/loc_train' + suffix + '.npy')
     edges_train = np.load('data/edges_train' + suffix + '.npy')
     path_train = np.load('data/path_train' + suffix + '.npy')
@@ -389,6 +491,13 @@ def load_data_vis(batch_size=1, suffix=''):
     return train_data_loader, path_train, max_min_train, valid_data_loader, path_valid, max_min_valid, test_data_loader, path_test, max_min_test
 
 def load_data(batch_size=1, suffix=''):
+    """
+    Load the dataset.
+
+    Args:
+        batch_size: (int): write your description
+        suffix: (str): write your description
+    """
     loc_train = np.load('data/loc_train' + suffix + '.npy')
     edges_train = np.load('data/edges_train' + suffix + '.npy')
     vis_train = np.load('data/vis_train' + suffix + '.npy')

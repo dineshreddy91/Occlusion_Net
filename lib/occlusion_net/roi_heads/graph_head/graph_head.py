@@ -13,6 +13,14 @@ import pickle
 
 class ROIGraphHead(torch.nn.Module):
     def __init__(self, cfg, in_channels):
+        """
+        Initialize the graph
+
+        Args:
+            self: (todo): write your description
+            cfg: (todo): write your description
+            in_channels: (int): write your description
+        """
         super(ROIGraphHead, self).__init__()
         self.cfg = cfg.clone()
         self.predictor_heatmap = make_roi_keypoint_predictor(
@@ -105,4 +113,11 @@ class ROIGraphHead(torch.nn.Module):
 
 
 def build_roi_graph_head(cfg, in_channels):
+    """
+    Build a list of the head of the given cfg graph.
+
+    Args:
+        cfg: (int): write your description
+        in_channels: (int): write your description
+    """
     return ROIGraphHead(cfg, in_channels)

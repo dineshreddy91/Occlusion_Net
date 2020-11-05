@@ -14,6 +14,11 @@ import json
 
 
 def parse_args():
+    """
+    Parse command line arguments.
+
+    Args:
+    """
     parser = argparse.ArgumentParser(description='evaluation on zensors data')
 
     parser.add_argument(

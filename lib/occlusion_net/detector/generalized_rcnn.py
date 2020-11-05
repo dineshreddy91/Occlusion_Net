@@ -24,6 +24,13 @@ class GeneralizedRCNN(nn.Module):
     """
 
     def __init__(self, cfg):
+        """
+        Initialize the robot.
+
+        Args:
+            self: (todo): write your description
+            cfg: (todo): write your description
+        """
         super(GeneralizedRCNN, self).__init__()
 
         self.backbone = build_backbone(cfg)

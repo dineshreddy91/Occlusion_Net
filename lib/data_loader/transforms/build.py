@@ -3,6 +3,13 @@ from . import transforms as T
 
 
 def build_transforms(cfg, is_train=True):
+    """
+    Builds tensorflow transforms.
+
+    Args:
+        cfg: (todo): write your description
+        is_train: (bool): write your description
+    """
     if is_train:
         min_size = cfg.INPUT.MIN_SIZE_TRAIN
         max_size = cfg.INPUT.MAX_SIZE_TRAIN

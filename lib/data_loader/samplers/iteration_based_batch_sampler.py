@@ -9,11 +9,26 @@ class IterationBasedBatchSampler(BatchSampler):
     """
 
     def __init__(self, batch_sampler, num_iterations, start_iter=0):
+        """
+        Initialize the sampler.
+
+        Args:
+            self: (todo): write your description
+            batch_sampler: (todo): write your description
+            num_iterations: (int): write your description
+            start_iter: (todo): write your description
+        """
         self.batch_sampler = batch_sampler
         self.num_iterations = num_iterations
         self.start_iter = start_iter
 
     def __iter__(self):
+        """
+        Iterate over the sampler.
+
+        Args:
+            self: (todo): write your description
+        """
         iteration = self.start_iter
         while iteration <= self.num_iterations:
             # if the underlying sampler has a set_epoch method, like
@@ -28,4 +43,10 @@ class IterationBasedBatchSampler(BatchSampler):
                 yield batch
 
     def __len__(self):
+        """
+        Returns the number of num_iterations.
+
+        Args:
+            self: (todo): write your description
+        """
         return self.num_iterations

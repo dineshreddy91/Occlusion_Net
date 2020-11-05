@@ -15,6 +15,12 @@ from .utils import *
 from sklearn.decomposition import PCA
 
 def graph_to_heatmap(graph_features):	
+    """
+    Convert a graph_features into a heatmap.
+
+    Args:
+        graph_features: (todo): write your description
+    """
         heatmap = torch.zeros([count,num_keypoints,width,width], dtype=torch.float64).cuda()
         index_y = graph_features[:,:,0].type(torch.int32)
         index_x = graph_features[:,:,1].type(torch.int32)
@@ -28,6 +34,12 @@ def graph_to_heatmap(graph_features):
         loop1 = loop1+1 
 
 def heatmaps_to_graph(heatmaps):
+    """
+    Convert a heatmaps from a heatmaps.
+
+    Args:
+        heatmaps: (todo): write your description
+    """
 
       count = heatmaps.shape[0]
       num_keypoints = heatmaps.shape[1]
@@ -114,6 +126,12 @@ def orthographic_proj_withz(X, cam, ratio, offset_z=0.):
     return torch.cat((proj_xy, proj_z), 2)
 
 def pca_computation(path):
+    """
+    Calculate mean and standard deviation.
+
+    Args:
+        path: (str): write your description
+    """
         pca_3d = np.load(path)
         #first_half = pca_3d[:,0:8,:]
         #second_half = pca_3d[:,8:,:]
@@ -141,6 +159,13 @@ def pca_computation(path):
 @registry.ROI_GRAPH_FEATURE_EXTRACTORS.register("graphRCNNFeatureExtractor")
 class graphRCNNFeatureExtractor(nn.Module):
     def __init__(self, cfg):
+        """
+        Initialize graph
+
+        Args:
+            self: (todo): write your description
+            cfg: (todo): write your description
+        """
         super(graphRCNNFeatureExtractor, self).__init__()
         self.encoder = GraphEncoder(cfg.MODEL.ROI_GRAPH_HEAD.DIMS,
                                     cfg.MODEL.ROI_GRAPH_HEAD.ENCODER_HIDDEN,
@@ -180,6 +205,14 @@ class graphRCNNFeatureExtractor(nn.Module):
 
        
     def forward(self, x, ratio):
+        """
+        Forward forward forward computation
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+            ratio: (todo): write your description
+        """
         logits = self.encoder(x,self.rel_rec,self.rel_send)
         edges = my_softmax(logits, -1)
         KGNN2D = self.decoder(x, edges, self.rel_rec, self.rel_send,0)# args.prediction_steps)
@@ -201,6 +234,12 @@ class graphRCNNFeatureExtractor(nn.Module):
 
 
 def make_roi_graph_feature_extractor(cfg):
+    """
+    Make a feature graph feature graph.
+
+    Args:
+        cfg: (todo): write your description
+    """
     func = registry.ROI_GRAPH_FEATURE_EXTRACTORS[
         cfg.MODEL.ROI_GRAPH_HEAD.FEATURE_EXTRACTOR
     ]

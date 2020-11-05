@@ -7,6 +7,15 @@ FLIP_TOP_BOTTOM = 1
 
 class Keypoints(object):
     def __init__(self, keypoints, size, mode=None):
+        """
+        Initialize the device.
+
+        Args:
+            self: (todo): write your description
+            keypoints: (str): write your description
+            size: (int): write your description
+            mode: (todo): write your description
+        """
         # FIXME remove check once we have better integration with device
         # in my version this would consistently return a CPU tensor
         device = keypoints.device if isinstance(keypoints, torch.Tensor) else torch.device('cpu')
@@ -24,9 +33,23 @@ class Keypoints(object):
         self.extra_fields = {}
 
     def crop(self, box):
+        """
+        Crop the image.
+
+        Args:
+            self: (todo): write your description
+            box: (array): write your description
+        """
         raise NotImplementedError()
 
     def resize(self, size, *args, **kwargs):
+        """
+        Resize the size of the given size.
+
+        Args:
+            self: (todo): write your description
+            size: (int): write your description
+        """
         ratios = tuple(float(s) / float(s_orig) for s, s_orig in zip(size, self.size))
         ratio_w, ratio_h = ratios
         resized_data = self.keypoints.clone()
@@ -38,6 +61,13 @@ class Keypoints(object):
         return keypoints
 
     def transpose(self, method):
+        """
+        Transpose this object to another object.
+
+        Args:
+            self: (todo): write your description
+            method: (str): write your description
+        """
         if method not in (FLIP_LEFT_RIGHT,):
             raise NotImplementedError(
                     "Only FLIP_LEFT_RIGHT implemented")
@@ -58,6 +88,12 @@ class Keypoints(object):
         return keypoints
 
     def to(self, *args, **kwargs):
+        """
+        Convert to a set of fields.
+
+        Args:
+            self: (todo): write your description
+        """
         keypoints = type(self)(self.keypoints.to(*args, **kwargs), self.size, self.mode)
         for k, v in self.extra_fields.items():
             if hasattr(v, "to"):
@@ -66,18 +102,46 @@ class Keypoints(object):
         return keypoints
 
     def __getitem__(self, item):
+        """
+        Get a fieldpoints for the given item
+
+        Args:
+            self: (todo): write your description
+            item: (str): write your description
+        """
         keypoints = type(self)(self.keypoints[item], self.size, self.mode)
         for k, v in self.extra_fields.items():
             keypoints.add_field(k, v[item])
         return keypoints
 
     def add_field(self, field, field_data):
+        """
+        Add a new field to the document.
+
+        Args:
+            self: (todo): write your description
+            field: (todo): write your description
+            field_data: (todo): write your description
+        """
         self.extra_fields[field] = field_data
 
     def get_field(self, field):
+        """
+        Get the value of a field
+
+        Args:
+            self: (str): write your description
+            field: (str): write your description
+        """
         return self.extra_fields[field]
 
     def __repr__(self):
+        """
+        Return a repr representation of - recursively.
+
+        Args:
+            self: (todo): write your description
+        """
         s = self.__class__.__name__ + '('
         s += 'num_instances={}, '.format(len(self.keypoints))
         s += 'image_width={}, '.format(self.size[0])
@@ -86,6 +150,13 @@ class Keypoints(object):
 
 
 def _create_flip_indices(names, flip_map):
+    """
+    Create a list of indices of a set of a list.
+
+    Args:
+        names: (list): write your description
+        flip_map: (dict): write your description
+    """
     full_flip_map = flip_map.copy()
     full_flip_map.update({v: k for k, v in flip_map.items()})
     flipped_names = [i if i not in full_flip_map else full_flip_map[i] for i in names]
@@ -123,6 +194,12 @@ class VehicleKeypoints(Keypoints):
 # TODO this doesn't look great
 VehicleKeypoints.FLIP_INDS = _create_flip_indices(VehicleKeypoints.NAMES, VehicleKeypoints.FLIP_MAP)
 def kp_connections(keypoints):
+    """
+    Return kp kp_connections
+
+    Args:
+        keypoints: (array): write your description
+    """
     kp_lines = [[0, 2],
                 [1, 3],
                 [0, 1],
@@ -148,6 +225,14 @@ VehicleKeypoints.CONNECTIONS = kp_connections(VehicleKeypoints.NAMES)
 
 # TODO make this nicer, this is a direct translation from C2 (but removing the inner loop)
 def keypoints_to_heat_map(keypoints, rois, heatmap_size):
+    """
+    Convert a heatmap to a heatmap.
+
+    Args:
+        keypoints: (str): write your description
+        rois: (todo): write your description
+        heatmap_size: (int): write your description
+    """
     if rois.numel() == 0:
         return rois.new().long(), rois.new().long()
     offset_x = rois[:, 0]
@@ -218,6 +303,12 @@ class PersonKeypoints(Keypoints):
 
 PersonKeypoints.FLIP_INDS = _create_flip_indices(PersonKeypoints.NAMES, PersonKeypoints.FLIP_MAP)
 def kp_connections_person(keypoints):
+    """
+    Return kp connection objects for a kp keypoints
+
+    Args:
+        keypoints: (str): write your description
+    """
     kp_lines = [
         [keypoints.index('left_eye'), keypoints.index('right_eye')],
         [keypoints.index('left_eye'), keypoints.index('nose')],

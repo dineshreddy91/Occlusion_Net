@@ -23,6 +23,16 @@ class DistributedSampler(Sampler):
     """
 
     def __init__(self, dataset, num_replicas=None, rank=None, shuffle=True):
+        """
+        Initialize the dataset.
+
+        Args:
+            self: (todo): write your description
+            dataset: (todo): write your description
+            num_replicas: (int): write your description
+            rank: (int): write your description
+            shuffle: (bool): write your description
+        """
         if num_replicas is None:
             if not dist.is_available():
                 raise RuntimeError("Requires distributed package to be available")
@@ -40,6 +50,12 @@ class DistributedSampler(Sampler):
         self.shuffle = shuffle
 
     def __iter__(self):
+        """
+        Generate an iterator.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.shuffle:
             # deterministically shuffle based on epoch
             g = torch.Generator()
@@ -60,7 +76,20 @@ class DistributedSampler(Sampler):
         return iter(indices)
 
     def __len__(self):
+        """
+        Returns the number of samples in this dataset.
+
+        Args:
+            self: (todo): write your description
+        """
         return self.num_samples
 
     def set_epoch(self, epoch):
+        """
+        Set the epoch for the given epoch.
+
+        Args:
+            self: (todo): write your description
+            epoch: (todo): write your description
+        """
         self.epoch = epoch

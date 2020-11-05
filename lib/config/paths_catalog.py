@@ -145,6 +145,12 @@ class DatasetCatalog(object):
 
     @staticmethod
     def get(name):
+        """
+        Get a dataset.
+
+        Args:
+            name: (str): write your description
+        """
         if "coco" in name and "carfusion" in name:
             data_dir = DatasetCatalog.DATA_DIR
             attrs = DatasetCatalog.DATASETS[name]
@@ -208,6 +214,12 @@ class ModelCatalog(object):
 
     @staticmethod
     def get(name):
+        """
+        Get a model by name.
+
+        Args:
+            name: (str): write your description
+        """
         if name.startswith("Caffe2Detectron/COCO"):
             return ModelCatalog.get_c2_detectron_12_2017_baselines(name)
         if name.startswith("ImageNetPretrained"):
@@ -216,6 +228,12 @@ class ModelCatalog(object):
 
     @staticmethod
     def get_c2_imagenet_pretrained(name):
+        """
+        Returns the c2 model name for a given model.
+
+        Args:
+            name: (str): write your description
+        """
         prefix = ModelCatalog.S3_C2_DETECTRON_URL
         name = name[len("ImageNetPretrained/"):]
         name = ModelCatalog.C2_IMAGENET_MODELS[name]
@@ -224,6 +242,12 @@ class ModelCatalog(object):
 
     @staticmethod
     def get_c2_detectron_12_2017_baselines(name):
+        """
+        Return the name of the 2nd 2nd 2nd 2.
+
+        Args:
+            name: (str): write your description
+        """
         # Detectron C2 models are stored following the structure
         # prefix/<model_id>/2012_2017_baselines/<model_name>.yaml.<signature>/suffix
         # we use as identifiers in the catalog Caffe2Detectron/COCO/<model_id>/<model_name>

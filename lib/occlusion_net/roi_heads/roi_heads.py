@@ -14,6 +14,14 @@ class CombinedROIHeads(torch.nn.ModuleDict):
     """
 
     def __init__(self, cfg, heads):
+        """
+        Initialize the graph
+
+        Args:
+            self: (todo): write your description
+            cfg: (todo): write your description
+            heads: (todo): write your description
+        """
         super(CombinedROIHeads, self).__init__(heads)
         self.cfg = cfg.clone()
         if cfg.MODEL.MASK_ON and cfg.MODEL.ROI_MASK_HEAD.SHARE_BOX_FEATURE_EXTRACTOR:
@@ -24,6 +32,15 @@ class CombinedROIHeads(torch.nn.ModuleDict):
             self.graph.feature_extractor = self.box.feature_extractor
 
     def forward(self, features, proposals, targets=None):
+        """
+        Forward computation.
+
+        Args:
+            self: (todo): write your description
+            features: (todo): write your description
+            proposals: (todo): write your description
+            targets: (todo): write your description
+        """
         losses = {}
         # TODO rename x to roi_box_features, if it doesn't increase memory consumption
         x, detections, loss_box = self.box(features, proposals, targets)
@@ -80,6 +97,13 @@ class CombinedROIHeads(torch.nn.ModuleDict):
 
 
 def build_roi_heads(cfg, in_channels):
+    """
+    Build a list of roi - like object.
+
+    Args:
+        cfg: (todo): write your description
+        in_channels: (int): write your description
+    """
     # individually create the heads, that will be combined together
     # afterwards
     roi_heads = []

@@ -15,12 +15,29 @@ _EPS = 1e-10
 
 class Flatten(nn.Module):
     def forward(self, input):
+        """
+        Returns the forward input of the input.
+
+        Args:
+            self: (todo): write your description
+            input: (todo): write your description
+        """
         return input.view(input.size(0), -1)
     
 class MLP(nn.Module):
     """Two-layer fully-connected ELU net with batch norm."""
 
     def __init__(self, n_in, n_hid, n_out, do_prob=0.):
+        """
+        Initialize the gradient.
+
+        Args:
+            self: (todo): write your description
+            n_in: (int): write your description
+            n_hid: (int): write your description
+            n_out: (str): write your description
+            do_prob: (int): write your description
+        """
         super(MLP, self).__init__()
         self.fc1 = nn.Linear(n_in, n_hid)
         self.fc2 = nn.Linear(n_hid, n_out)
@@ -30,6 +47,12 @@ class MLP(nn.Module):
         self.init_weights()
 
     def init_weights(self):
+        """
+        Initialize weights. weights.
+
+        Args:
+            self: (todo): write your description
+        """
         for m in self.modules():
             if isinstance(m, nn.Linear):
                 nn.init.xavier_normal_(m.weight.data)
@@ -39,11 +62,25 @@ class MLP(nn.Module):
                 m.bias.data.zero_()
 
     def batch_norm(self, inputs):
+        """
+        Batch normalization.
+
+        Args:
+            self: (todo): write your description
+            inputs: (todo): write your description
+        """
         x = inputs.view(inputs.size(0) * inputs.size(1), -1)
         x = self.bn(x)
         return x.view(inputs.size(0), inputs.size(1), -1)
 
     def forward(self, inputs):
+        """
+        Forward computation.
+
+        Args:
+            self: (todo): write your description
+            inputs: (todo): write your description
+        """
         # Input shape: [num_sims, num_things, num_features]
         x = F.elu(self.fc1(inputs))
         x = F.dropout(x, self.dropout_prob, training=self.training)
@@ -53,6 +90,16 @@ class MLP(nn.Module):
 
 class CNN(nn.Module):
     def __init__(self, n_in, n_hid, n_out, do_prob=0.):
+        """
+        Initialize the network.
+
+        Args:
+            self: (todo): write your description
+            n_in: (int): write your description
+            n_hid: (int): write your description
+            n_out: (str): write your description
+            do_prob: (int): write your description
+        """
         super(CNN, self).__init__()
         self.pool = nn.MaxPool1d(kernel_size=2, stride=None, padding=0,
                                  dilation=1, return_indices=False,
@@ -69,6 +116,12 @@ class CNN(nn.Module):
         self.init_weights()
 
     def init_weights(self):
+        """
+        Initialize the weights.
+
+        Args:
+            self: (todo): write your description
+        """
         for m in self.modules():
             if isinstance(m, nn.Conv1d):
                 n = m.kernel_size[0] * m.out_channels
@@ -79,6 +132,13 @@ class CNN(nn.Module):
                 m.bias.data.zero_()
 
     def forward(self, inputs):
+        """
+        Forward computation.
+
+        Args:
+            self: (todo): write your description
+            inputs: (todo): write your description
+        """
         # Input shape: [num_sims * num_edges, num_dims, num_timesteps]
 
         x = F.relu(self.conv1(inputs))
@@ -96,6 +156,18 @@ class CNN(nn.Module):
 
 class GraphEncoder3D(nn.Module):
     def __init__(self, n_in, n_hid, n_out, n_kps, do_prob=0., factor=True):
+        """
+        Initialize the hps
+
+        Args:
+            self: (todo): write your description
+            n_in: (int): write your description
+            n_hid: (int): write your description
+            n_out: (str): write your description
+            n_kps: (int): write your description
+            do_prob: (int): write your description
+            factor: (float): write your description
+        """
         super(GraphEncoder3D, self).__init__()
 
         self.factor = factor
@@ -114,17 +186,41 @@ class GraphEncoder3D(nn.Module):
         self.init_weights()
 
     def init_weights(self):
+        """
+        Initialize weights.
+
+        Args:
+            self: (todo): write your description
+        """
         for m in self.modules():
             if isinstance(m, nn.Linear):
                 nn.init.xavier_normal_(m.weight.data)
                 m.bias.data.fill_(0.1)
 
     def edge2node(self, x, rel_rec, rel_send):
+        """
+        Return the edges of * x
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+            rel_rec: (todo): write your description
+            rel_send: (todo): write your description
+        """
         # NOTE: Assumes that we have the same graph across all samples.
         incoming = torch.matmul(rel_rec.t(), x)
         return incoming / incoming.size(1)
 
     def node2edge(self, x, rel_rec, rel_send):
+        """
+        Return the edge from * rel_records.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+            rel_rec: (todo): write your description
+            rel_send: (todo): write your description
+        """
         # NOTE: Assumes that we have the same graph across all samples.
         receivers = torch.matmul(rel_rec, x)
         senders = torch.matmul(rel_send, x)
@@ -132,6 +228,15 @@ class GraphEncoder3D(nn.Module):
         return edges
 
     def forward(self, inputs, rel_rec, rel_send):
+        """
+        Forward forward
+
+        Args:
+            self: (todo): write your description
+            inputs: (todo): write your description
+            rel_rec: (todo): write your description
+            rel_send: (todo): write your description
+        """
         # Input shape: [num_sims, num_atoms, num_timesteps, num_dims]
         x = inputs.view(inputs.size(0), inputs.size(1), -1)
         # New shape: [num_sims, num_atoms, num_timesteps*num_dims]
@@ -163,6 +268,17 @@ class GraphEncoder3D(nn.Module):
 
 class GraphEncoder(nn.Module):
     def __init__(self, n_in, n_hid, n_out, do_prob=0., factor=True):
+        """
+        Initialize h_weights
+
+        Args:
+            self: (todo): write your description
+            n_in: (int): write your description
+            n_hid: (int): write your description
+            n_out: (str): write your description
+            do_prob: (int): write your description
+            factor: (float): write your description
+        """
         super(GraphEncoder, self).__init__()
 
         self.factor = factor
@@ -180,17 +296,41 @@ class GraphEncoder(nn.Module):
         self.init_weights()
 
     def init_weights(self):
+        """
+        Initialize weights.
+
+        Args:
+            self: (todo): write your description
+        """
         for m in self.modules():
             if isinstance(m, nn.Linear):
                 nn.init.xavier_normal_(m.weight.data)
                 m.bias.data.fill_(0.1)
 
     def edge2node(self, x, rel_rec, rel_send):
+        """
+        Return the edges of * x
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+            rel_rec: (todo): write your description
+            rel_send: (todo): write your description
+        """
         # NOTE: Assumes that we have the same graph across all samples.
         incoming = torch.matmul(rel_rec.t(), x)
         return incoming / incoming.size(1)
 
     def node2edge(self, x, rel_rec, rel_send):
+        """
+        Return the edge from * rel_records.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+            rel_rec: (todo): write your description
+            rel_send: (todo): write your description
+        """
         # NOTE: Assumes that we have the same graph across all samples.
         receivers = torch.matmul(rel_rec, x)
         senders = torch.matmul(rel_send, x)
@@ -198,6 +338,15 @@ class GraphEncoder(nn.Module):
         return edges
 
     def forward(self, inputs, rel_rec, rel_send):
+        """
+        Parameters : meth.
+
+        Args:
+            self: (todo): write your description
+            inputs: (todo): write your description
+            rel_rec: (todo): write your description
+            rel_send: (todo): write your description
+        """
         # Input shape: [num_sims, num_atoms, num_timesteps, num_dims]
         x = inputs.view(inputs.size(0), inputs.size(1), -1)
         # New shape: [num_sims, num_atoms, num_timesteps*num_dims]
@@ -224,6 +373,19 @@ class GraphDecoder(nn.Module):
 
     def __init__(self, n_in_node, edge_types, msg_hid, msg_out, n_hid,
                  do_prob=0., skip_first=False):
+        """
+        Initialize the graph.
+
+        Args:
+            self: (todo): write your description
+            n_in_node: (int): write your description
+            edge_types: (str): write your description
+            msg_hid: (int): write your description
+            msg_out: (str): write your description
+            n_hid: (int): write your description
+            do_prob: (int): write your description
+            skip_first: (str): write your description
+        """
         super(GraphDecoder, self).__init__()
         self.msg_fc1 = nn.ModuleList(
             [nn.Linear(2 * n_in_node, msg_hid) for _ in range(edge_types)])
@@ -242,6 +404,16 @@ class GraphDecoder(nn.Module):
 
     def single_step_forward(self, single_timestep_inputs, rel_rec, rel_send,
                             single_timestep_rel_type):
+        """
+        Parameters ---------- single step.
+
+        Args:
+            self: (todo): write your description
+            single_timestep_inputs: (bool): write your description
+            rel_rec: (str): write your description
+            rel_send: (todo): write your description
+            single_timestep_rel_type: (todo): write your description
+        """
 
         # single_timestep_inputs has shape
         # [batch_size, num_timesteps, num_atoms, num_dims]
@@ -289,6 +461,17 @@ class GraphDecoder(nn.Module):
         return single_timestep_inputs + pred
 
     def forward(self, inputs, rel_type, rel_rec, rel_send, pred_steps=1):
+        """
+        Forward computation.
+
+        Args:
+            self: (todo): write your description
+            inputs: (todo): write your description
+            rel_type: (str): write your description
+            rel_rec: (todo): write your description
+            rel_send: (todo): write your description
+            pred_steps: (todo): write your description
+        """
         # NOTE: Assumes that we have the same graph across all samples.
 
 

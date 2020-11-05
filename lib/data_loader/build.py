@@ -60,6 +60,14 @@ def build_dataset(dataset_list, transforms, dataset_catalog, is_train=True):
 
 
 def make_data_sampler(dataset, shuffle, distributed):
+    """
+    Create a sampler.
+
+    Args:
+        dataset: (todo): write your description
+        shuffle: (bool): write your description
+        distributed: (str): write your description
+    """
     if distributed:
         return samplers.DistributedSampler(dataset, shuffle=shuffle)
     if shuffle:
@@ -70,6 +78,13 @@ def make_data_sampler(dataset, shuffle, distributed):
 
 
 def _quantize(x, bins):
+    """
+    Quantize all the quantized quantized quantized quantiles.
+
+    Args:
+        x: (array): write your description
+        bins: (int): write your description
+    """
     bins = copy.copy(bins)
     bins = sorted(bins)
     quantized = list(map(lambda y: bisect.bisect_right(bins, y), x))
@@ -77,6 +92,12 @@ def _quantize(x, bins):
 
 
 def _compute_aspect_ratios(dataset):
+    """
+    Compute the ratio.
+
+    Args:
+        dataset: (todo): write your description
+    """
     aspect_ratios = []
     for i in range(len(dataset)):
         img_info = dataset.get_img_info(i)
@@ -88,6 +109,17 @@ def _compute_aspect_ratios(dataset):
 def make_batch_data_sampler(
     dataset, sampler, aspect_grouping, images_per_batch, num_iters=None, start_iter=0
 ):
+    """
+    Creates a batch dataset.
+
+    Args:
+        dataset: (todo): write your description
+        sampler: (str): write your description
+        aspect_grouping: (todo): write your description
+        images_per_batch: (todo): write your description
+        num_iters: (int): write your description
+        start_iter: (int): write your description
+    """
     if aspect_grouping:
         if not isinstance(aspect_grouping, (list, tuple)):
             aspect_grouping = [aspect_grouping]
@@ -108,6 +140,15 @@ def make_batch_data_sampler(
 
 
 def make_data_loader(cfg, is_train=True, is_distributed=False, start_iter=0):
+    """
+    Make dataset loader.
+
+    Args:
+        cfg: (todo): write your description
+        is_train: (bool): write your description
+        is_distributed: (bool): write your description
+        start_iter: (int): write your description
+    """
     num_gpus = get_world_size()
     if is_train:
         images_per_batch = cfg.SOLVER.IMS_PER_BATCH

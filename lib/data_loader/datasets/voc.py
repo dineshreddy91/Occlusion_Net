@@ -41,6 +41,16 @@ class PascalVOCDataset(torch.utils.data.Dataset):
     )
 
     def __init__(self, data_dir, split, use_difficult=False, transforms=None):
+        """
+        Initialize the dataset.
+
+        Args:
+            self: (todo): write your description
+            data_dir: (str): write your description
+            split: (int): write your description
+            use_difficult: (bool): write your description
+            transforms: (str): write your description
+        """
         self.root = data_dir
         self.image_set = split
         self.keep_difficult = use_difficult
@@ -59,6 +69,13 @@ class PascalVOCDataset(torch.utils.data.Dataset):
         self.class_to_ind = dict(zip(cls, range(len(cls))))
 
     def __getitem__(self, index):
+        """
+        Return an item from the index
+
+        Args:
+            self: (todo): write your description
+            index: (int): write your description
+        """
         img_id = self.ids[index]
         img = Image.open(self._imgpath % img_id).convert("RGB")
 
@@ -71,9 +88,22 @@ class PascalVOCDataset(torch.utils.data.Dataset):
         return img, target, index
 
     def __len__(self):
+        """
+        Returns the length of the length.
+
+        Args:
+            self: (todo): write your description
+        """
         return len(self.ids)
 
     def get_groundtruth(self, index):
+        """
+        Get a list of ids
+
+        Args:
+            self: (todo): write your description
+            index: (int): write your description
+        """
         img_id = self.ids[index]
         anno = ET.parse(self._annopath % img_id).getroot()
         anno = self._preprocess_annotation(anno)
@@ -85,6 +115,13 @@ class PascalVOCDataset(torch.utils.data.Dataset):
         return target
 
     def _preprocess_annotation(self, target):
+        """
+        Preprocess the preprocesses.
+
+        Args:
+            self: (todo): write your description
+            target: (todo): write your description
+        """
         boxes = []
         gt_classes = []
         difficult_boxes = []
@@ -124,6 +161,13 @@ class PascalVOCDataset(torch.utils.data.Dataset):
         return res
 
     def get_img_info(self, index):
+        """
+        Extract image info.
+
+        Args:
+            self: (todo): write your description
+            index: (int): write your description
+        """
         img_id = self.ids[index]
         anno = ET.parse(self._annopath % img_id).getroot()
         size = anno.find("size")
@@ -131,4 +175,11 @@ class PascalVOCDataset(torch.utils.data.Dataset):
         return {"height": im_info[0], "width": im_info[1]}
 
     def map_class_id_to_class_name(self, class_id):
+        """
+        Convert class_id_name to class_name.
+
+        Args:
+            self: (todo): write your description
+            class_id: (str): write your description
+        """
         return PascalVOCDataset.CLASSES[class_id]

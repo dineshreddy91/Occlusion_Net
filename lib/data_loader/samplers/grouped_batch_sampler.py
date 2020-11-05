@@ -22,6 +22,16 @@ class GroupedBatchSampler(BatchSampler):
     """
 
     def __init__(self, sampler, group_ids, batch_size, drop_uneven=False):
+        """
+        Initialize a batch of batches.
+
+        Args:
+            self: (todo): write your description
+            sampler: (todo): write your description
+            group_ids: (str): write your description
+            batch_size: (int): write your description
+            drop_uneven: (todo): write your description
+        """
         if not isinstance(sampler, Sampler):
             raise ValueError(
                 "sampler should be an instance of "
@@ -38,6 +48,12 @@ class GroupedBatchSampler(BatchSampler):
         self._can_reuse_batches = False
 
     def _prepare_batches(self):
+        """
+        Prepare batches for batches.
+
+        Args:
+            self: (todo): write your description
+        """
         dataset_size = len(self.group_ids)
         # get the sampled indices from the sampler
         sampled_ids = torch.as_tensor(list(self.sampler))
@@ -100,6 +116,12 @@ class GroupedBatchSampler(BatchSampler):
         return batches
 
     def __iter__(self):
+        """
+        Return iterator over all batches in the queue.
+
+        Args:
+            self: (todo): write your description
+        """
         if self._can_reuse_batches:
             batches = self._batches
             self._can_reuse_batches = False
@@ -109,6 +131,12 @@ class GroupedBatchSampler(BatchSampler):
         return iter(batches)
 
     def __len__(self):
+        """
+        Determine if the current batch.
+
+        Args:
+            self: (todo): write your description
+        """
         if not hasattr(self, "_batches"):
             self._batches = self._prepare_batches()
             self._can_reuse_batches = True

@@ -38,6 +38,14 @@ except ImportError:
 
 
 def train(cfg, local_rank, distributed):
+    """
+    Train the model.
+
+    Args:
+        cfg: (array): write your description
+        local_rank: (todo): write your description
+        distributed: (str): write your description
+    """
     model = build_detection_model(cfg)
     device = torch.device(cfg.MODEL.DEVICE)
     model.to(device)
@@ -96,6 +104,14 @@ def train(cfg, local_rank, distributed):
 
 
 def run_test(cfg, model, distributed):
+    """
+    Run a test test test.
+
+    Args:
+        cfg: (str): write your description
+        model: (todo): write your description
+        distributed: (str): write your description
+    """
     if distributed:
         model = model.module
     torch.cuda.empty_cache()  # TODO check if it helps
@@ -128,6 +144,11 @@ def run_test(cfg, model, distributed):
 
 
 def main():
+    """
+    Main function.
+
+    Args:
+    """
     parser = argparse.ArgumentParser(description="PyTorch Object Detection Training")
     parser.add_argument(
         "--config-file",
