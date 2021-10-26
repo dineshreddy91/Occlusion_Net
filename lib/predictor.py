@@ -435,8 +435,8 @@ def vis_keypoints_car_vis(img, kps, kp_thresh=2, alpha=1):
     for l in range(len(kp_lines)):
         i1 = kp_lines[l][0]
         i2 = kp_lines[l][1]
-        p1 = kps[0, i1], kps[1, i1]
-        p2 = kps[0, i2], kps[1, i2]
+        p1 = int(kps[0, i1]), int(kps[1, i1])
+        p2 = int(kps[0, i2]), int(kps[1, i2])
         if kps[2, i1] > kp_thresh and kps[2, i2] > kp_thresh:
             cv2.line(
                 kp_mask, p1, p2,
